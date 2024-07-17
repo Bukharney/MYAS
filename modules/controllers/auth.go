@@ -22,7 +22,7 @@ func NewAuthController(r gin.IRoutes, cfg *configs.Configs, authUsecase entities
 
 	r.POST("/login", authController.Login)
 	r.POST("/logout", middlewares.JwtAuthentication(cfg), authController.Logout)
-	r.GET("/refresh-token", middlewares.JwtAuthentication(cfg), authController.RefreshToken)
+	r.GET("/refresh-token", authController.RefreshToken)
 }
 
 func (c *AuthController) Login(ctx *gin.Context) {

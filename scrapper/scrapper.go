@@ -102,8 +102,6 @@ func getAssignments(page playwright.Page, classID string) (ClassAssignments, err
 }
 
 func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
-	start := time.Now()
-	log.Printf("Time: %d", start.Unix())
 	pw, err := playwright.Run()
 	if err != nil {
 		return nil, fmt.Errorf("could not start Playwright: %v", err)
@@ -150,8 +148,6 @@ func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	log.Printf("Logged in as %s", username)
-
 	_, err = page.Goto("https://app.leb2.org/class")
 	if err != nil {
 		return nil, fmt.Errorf("could not goto class list page: %v", err)
@@ -175,8 +171,6 @@ func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
 		}
 	})
 
-	log.Printf("Found %d classes", len(classList))
-
 	// var wg sync.WaitGroup
 	// wg.Add(len(classList))
 	// var c SafeCounter
@@ -186,7 +180,6 @@ func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
 	// }
 	// NewCockies := cookiesToMap(cookies)
 	var a []ClassAssignments
-	log.Printf("Getting assignments for %d classes", len(classList))
 	for _, classID := range classList {
 		ass, err := getAssignments(page, classID)
 		if err != nil {
@@ -204,8 +197,6 @@ func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
 		// }()
 	}
 
-	log.Printf("Time: %d", time.Now().Unix()-start.Unix())
-
 	return a, nil
 }
 
@@ -215,14 +206,10 @@ type SafeAssignments struct {
 }
 
 func (c *SafeAssignments) GetAssignments(classID string, cookies []playwright.OptionalCookie, browser playwright.Browser) error {
-	log.Printf("Getting assignments for class %s", classID)
-	log.Println("Start: ", time.Now().Unix())
-
 	page, err := browser.NewPage()
 	if err != nil {
 		return fmt.Errorf("could not create page: %v", err)
 	}
-	log.Println("Page created: ", time.Now().Unix())
 
 	err = page.Context().AddCookies(
 		cookies,
@@ -230,7 +217,6 @@ func (c *SafeAssignments) GetAssignments(classID string, cookies []playwright.Op
 	if err != nil {
 		return fmt.Errorf("could not add cookies: %v", err)
 	}
-	log.Println("Cookies added: ", time.Now().Unix())
 
 	ass, err := getAssignments(page, classID)
 	if err != nil {
@@ -241,6 +227,5 @@ func (c *SafeAssignments) GetAssignments(classID string, cookies []playwright.Op
 	c.assignments = append(c.assignments, ass)
 	c.mu.Unlock()
 
-	log.Println("Done: ", time.Now().Unix())
 	return nil
 }

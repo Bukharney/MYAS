@@ -12,10 +12,10 @@ type AuthUsecase interface {
 }
 
 type AuthRepository interface {
-	DeleteToken(userId int) error
-	GetToken(userId int) (UserData, error)
-	SetToken(token UserData) error
-	UpdateToken(token UserData) error
+	DeleteUserById(userId int) error
+	GetUserById(userId int) (UserData, error)
+	SetUser(user UserData) error
+	UpdateUser(user UserData) error
 }
 
 type AuthCredentials struct {

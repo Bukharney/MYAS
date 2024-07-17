@@ -35,7 +35,7 @@ func (a *AuthUsecases) Login(user entities.UserData) (entities.ResToken, int, er
 		return token, http.StatusInternalServerError, err
 	}
 
-	err = a.AuthRepo.SetToken(entities.UserData{
+	err = a.AuthRepo.SetUser(entities.UserData{
 		UserID:       user.UserID,
 		Password:     hex.EncodeToString(encryptPass),
 		RefreshToken: refresh,
@@ -66,7 +66,7 @@ func (a *AuthUsecases) RefreshToken(ctx *gin.Context) (entities.ResToken, int, e
 		return token, http.StatusUnauthorized, err
 	}
 
-	redisUser, err := a.AuthRepo.GetToken(user.UserID)
+	redisUser, err := a.AuthRepo.GetUserById(user.UserID)
 	if err != nil {
 		return token, http.StatusNotFound, err
 	}
@@ -80,7 +80,7 @@ func (a *AuthUsecases) RefreshToken(ctx *gin.Context) (entities.ResToken, int, e
 		return token, code, err
 	}
 
-	err = a.AuthRepo.UpdateToken(entities.UserData{
+	err = a.AuthRepo.UpdateUser(entities.UserData{
 		UserID:       user.UserID,
 		RefreshToken: NewToken.RefreshToken,
 	})
@@ -109,7 +109,7 @@ func (a *AuthUsecases) Logout(ctx *gin.Context) (int, error) {
 		return http.StatusUnauthorized, err
 	}
 
-	err = a.AuthRepo.DeleteToken(user.UserID)
+	err = a.AuthRepo.DeleteUserById(user.UserID)
 	if err != nil {
 		return http.StatusInternalServerError, err
 	}

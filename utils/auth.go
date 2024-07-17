@@ -22,18 +22,13 @@ func GetTokenPart(c *gin.Context) (entities.ResToken, error) {
 	token := strings.Split(tokenHeader, ";")
 
 	for _, t := range token {
-		if strings.Contains(t, "access_token") {
-			token := strings.Split(t, "=")
-			tokenPart.AccessToken = token[1]
+		cleanToken := strings.Split(t, "=")
+		switch cleanToken[0] {
+		case "access_token":
+			tokenPart.AccessToken = cleanToken[1]
+		case "refresh_token":
+			tokenPart.RefreshToken = cleanToken[1]
 		}
-		if strings.Contains(t, "refresh_token") {
-			token := strings.Split(t, "=")
-			tokenPart.RefreshToken = token[1]
-		}
-	}
-
-	if tokenPart.AccessToken == "" || tokenPart.RefreshToken == "" {
-		return tokenPart, fmt.Errorf("no token found")
 	}
 
 	return tokenPart, nil

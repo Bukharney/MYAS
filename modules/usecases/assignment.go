@@ -2,7 +2,6 @@ package usecases
 
 import (
 	"encoding/hex"
-	"log"
 	"strconv"
 
 	"github.com/Bukharney/go-scrapper/configs"
@@ -35,7 +34,7 @@ func (u *AssignmentsUsecase) GetAssignments(c *gin.Context) ([]scrapper.ClassAss
 		return []scrapper.ClassAssignments{}, 401, err
 	}
 
-	redisUser, err := u.AuthRepo.GetToken(user.UserID)
+	redisUser, err := u.AuthRepo.GetUserById(user.UserID)
 	if err != nil {
 		return []scrapper.ClassAssignments{}, 401, err
 	}
@@ -45,12 +44,10 @@ func (u *AssignmentsUsecase) GetAssignments(c *gin.Context) ([]scrapper.ClassAss
 	}
 
 	n, _ := hex.DecodeString(redisUser.Password)
-	println("Encrypted Password:", n)
 	decryptedPass, err := utils.Decrypt([]byte(u.Cfg.Auth.AesKey), []byte(n))
 	if err != nil {
 		return []scrapper.ClassAssignments{}, 500, err
 	}
-	log.Println("Decrypted Password: ", string(decryptedPass))
 
 	assignments, err := scrapper.ScrapeAssignments(strconv.Itoa(user.UserID), string(decryptedPass))
 	if err != nil {
