@@ -1,8 +1,6 @@
 package controllers
 
 import (
-	"strconv"
-
 	"github.com/Bukharney/go-scrapper/configs"
 	"github.com/Bukharney/go-scrapper/middlewares"
 	"github.com/Bukharney/go-scrapper/modules/entities"
@@ -25,20 +23,14 @@ func NewAssignmentsController(r gin.IRoutes, cfg *configs.Configs, assignmentsUs
 }
 
 func (c *AssignmentsController) GetAssignmentsNoLogin(ctx *gin.Context) {
-	var user entities.UserData
+	var user entities.Leb2Credentials
 	u, p, ok := ctx.Request.BasicAuth()
 	if !ok {
 		ctx.JSON(401, gin.H{"error": "Unauthorized"})
 		return
 	}
 
-	id, err := strconv.Atoi(u)
-	if err != nil {
-		ctx.JSON(400, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
-	user.UserID = int(id)
+	user.Username = u
 	user.Password = p
 
 	assignments, code, err := c.AssignmentsUsecase.GetAssignmentsNoLogin(ctx, user)

@@ -1,12 +1,12 @@
 package usecases
 
 import (
-	"encoding/hex"
 	"fmt"
 	"net/http"
 
 	"github.com/Bukharney/go-scrapper/configs"
 	"github.com/Bukharney/go-scrapper/modules/entities"
+	"github.com/Bukharney/go-scrapper/scrapper"
 	"github.com/Bukharney/go-scrapper/utils"
 	"github.com/gin-gonic/gin"
 )
@@ -23,22 +23,27 @@ func NewAuthUsecase(cfg *configs.Configs, authRepo entities.AuthRepository) enti
 	}
 }
 
-func (a *AuthUsecases) Login(user entities.UserData) (entities.ResToken, int, error) {
+func (a *AuthUsecases) Login(user entities.Leb2Credentials) (entities.ResToken, int, error) {
 	var token entities.ResToken
-	access, refresh, err := a.SignNewToken(user.UserID, user.Password)
+	access, refresh, err := a.SignNewToken(user.Username, user.Password)
 	if err != nil {
 		return token, http.StatusInternalServerError, err
 	}
 
-	encryptPass, err := utils.Encrypt([]byte(a.Cfg.Auth.AesKey), []byte(user.Password))
+	page, err := scrapper.InitPlaywright()
+	if err != nil {
+		return token, http.StatusInternalServerError, err
+	}
+
+	cookies, err := scrapper.LEB2Login(page, user.Username, user.Password)
 	if err != nil {
 		return token, http.StatusInternalServerError, err
 	}
 
 	err = a.AuthRepo.SetUser(entities.UserData{
-		UserID:       user.UserID,
-		Password:     hex.EncodeToString(encryptPass),
+		UserID:       user.Username,
 		RefreshToken: refresh,
+		Cookies:      cookies,
 	})
 	if err != nil {
 		return token, http.StatusInternalServerError, err
@@ -117,7 +122,7 @@ func (a *AuthUsecases) Logout(ctx *gin.Context) (int, error) {
 	return http.StatusOK, nil
 }
 
-func (a *AuthUsecases) SignNewToken(id int, password string) (string, string, error) {
+func (a *AuthUsecases) SignNewToken(id string, password string) (string, string, error) {
 	access, err := utils.SignNewToken(a.Cfg, id, "access")
 	if err != nil {
 		return "", "", err

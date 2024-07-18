@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/Bukharney/go-scrapper/configs"
@@ -24,8 +23,8 @@ func NewAuthRepo(cfg *configs.Configs, redis *redis.Client) entities.AuthReposit
 	}
 }
 
-func (r *AuthRepo) GetUserById(userId int) (entities.UserData, error) {
-	val, err := r.Redis.Get(context.Background(), strconv.Itoa(userId)).Result()
+func (r *AuthRepo) GetUserById(userId string) (entities.UserData, error) {
+	val, err := r.Redis.Get(context.Background(), userId).Result()
 	if err != nil {
 		return entities.UserData{}, fmt.Errorf("token not found")
 	}
@@ -44,7 +43,7 @@ func (r *AuthRepo) SetUser(user entities.UserData) error {
 	if err != nil {
 		return err
 	}
-	err = r.Redis.Set(context.Background(), strconv.Itoa(user.UserID), data,
+	err = r.Redis.Set(context.Background(), user.UserID, data,
 		time.Duration(r.Cfg.Auth.RefreshTokenExpiresIn*int(time.Second))).Err()
 	if err != nil {
 		return err
@@ -68,8 +67,8 @@ func (r *AuthRepo) UpdateUser(userData entities.UserData) error {
 	return nil
 }
 
-func (r *AuthRepo) DeleteUserById(userId int) error {
-	err := r.Redis.Del(context.Background(), strconv.Itoa(userId)).Err()
+func (r *AuthRepo) DeleteUserById(userId string) error {
+	err := r.Redis.Del(context.Background(), userId).Err()
 	if err != nil {
 		return err
 	}

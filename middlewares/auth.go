@@ -19,6 +19,14 @@ func JwtAuthentication(cfg *configs.Configs) gin.HandlerFunc {
 			return
 		}
 
+		if tokenPart.AccessToken == "" {
+			c.JSON(http.StatusForbidden, gin.H{
+				"error": "No access token found",
+			})
+			c.Abort()
+			return
+		}
+
 		token, _, err := utils.CheckToken(c, cfg, tokenPart.AccessToken, "access")
 		if err != nil {
 			c.JSON(http.StatusForbidden, gin.H{

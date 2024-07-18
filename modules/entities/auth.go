@@ -3,17 +3,18 @@ package entities
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/playwright-community/playwright-go"
 )
 
 type AuthUsecase interface {
-	Login(user UserData) (ResToken, int, error)
+	Login(user Leb2Credentials) (ResToken, int, error)
 	RefreshToken(ctx *gin.Context) (ResToken, int, error)
 	Logout(ctx *gin.Context) (int, error)
 }
 
 type AuthRepository interface {
-	DeleteUserById(userId int) error
-	GetUserById(userId int) (UserData, error)
+	DeleteUserById(userId string) error
+	GetUserById(userId string) (UserData, error)
 	SetUser(user UserData) error
 	UpdateUser(user UserData) error
 }
@@ -24,15 +25,20 @@ type AuthCredentials struct {
 }
 
 type AccessTokenCustomClaims struct {
-	UserID    int    `json:"user_id"`
+	UserID    string `json:"user_id"`
 	TokenType string `json:"token_type"`
 	jwt.RegisteredClaims
 }
 
+type Leb2Credentials struct {
+	Username string `json:"username" db:"username" binding:"required"`
+	Password string `json:"password" db:"password" binding:"required"`
+}
+
 type UserData struct {
-	UserID       int    `json:"user_id" bson:"user_id"`
-	Password     string `json:"password" bson:"password"`
-	RefreshToken string `json:"refresh_token" bson:"refresh_token"`
+	UserID       string              `json:"user_id" bson:"user_id"`
+	RefreshToken string              `json:"refresh_token" bson:"refresh_token"`
+	Cookies      []playwright.Cookie `json:"cookies"`
 }
 
 type ResToken struct {

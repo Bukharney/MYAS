@@ -1,8 +1,7 @@
 package usecases
 
 import (
-	"encoding/hex"
-	"strconv"
+	"fmt"
 
 	"github.com/Bukharney/go-scrapper/configs"
 	"github.com/Bukharney/go-scrapper/modules/entities"
@@ -26,30 +25,28 @@ func NewAssignmentsUsecase(cfg *configs.Configs, authRepo entities.AuthRepositor
 func (u *AssignmentsUsecase) GetAssignments(c *gin.Context) ([]scrapper.ClassAssignments, int, error) {
 	tokenPart, err := utils.GetTokenPart(c)
 	if err != nil {
-		return []scrapper.ClassAssignments{}, 401, err
+		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("g")
+	}
+
+	if tokenPart.RefreshToken == "" {
+		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("h")
 	}
 
 	_, user, err := utils.CheckToken(c, u.Cfg, tokenPart.RefreshToken, "refresh")
 	if err != nil {
-		return []scrapper.ClassAssignments{}, 401, err
+		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("c")
 	}
 
 	redisUser, err := u.AuthRepo.GetUserById(user.UserID)
 	if err != nil {
-		return []scrapper.ClassAssignments{}, 401, err
+		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("i")
 	}
 
 	if redisUser.RefreshToken != tokenPart.RefreshToken {
 		return []scrapper.ClassAssignments{}, 401, nil
 	}
 
-	n, _ := hex.DecodeString(redisUser.Password)
-	decryptedPass, err := utils.Decrypt([]byte(u.Cfg.Auth.AesKey), []byte(n))
-	if err != nil {
-		return []scrapper.ClassAssignments{}, 500, err
-	}
-
-	assignments, err := scrapper.ScrapeAssignments(strconv.Itoa(user.UserID), string(decryptedPass))
+	assignments, err := scrapper.ScrapeAssignmentsByCookies(redisUser.Cookies)
 	if err != nil {
 		return []scrapper.ClassAssignments{}, 500, err
 	}
@@ -60,8 +57,8 @@ func (u *AssignmentsUsecase) GetAssignments(c *gin.Context) ([]scrapper.ClassAss
 	return assignments, 200, nil
 }
 
-func (u *AssignmentsUsecase) GetAssignmentsNoLogin(c *gin.Context, user entities.UserData) ([]scrapper.ClassAssignments, int, error) {
-	assignments, err := scrapper.ScrapeAssignments(strconv.Itoa(user.UserID), user.Password)
+func (u *AssignmentsUsecase) GetAssignmentsNoLogin(c *gin.Context, user entities.Leb2Credentials) ([]scrapper.ClassAssignments, int, error) {
+	assignments, err := scrapper.ScrapeAssignmentsByPassword(user.Username, user.Password)
 	if err != nil {
 		return []scrapper.ClassAssignments{}, 500, err
 	}

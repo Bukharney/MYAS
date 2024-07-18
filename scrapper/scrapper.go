@@ -5,7 +5,6 @@ import (
 	"log"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/playwright-community/playwright-go"
@@ -22,10 +21,31 @@ type ClassAssignments struct {
 	Assignments []Assignment
 }
 
-func CookiesToMap(cookies []playwright.Cookie) []playwright.OptionalCookie {
-	var cookieMap []playwright.OptionalCookie
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
+func CookieFilter(cookies []playwright.Cookie) []playwright.Cookie {
+	var cookieList []playwright.Cookie
+	cList := []string{"laravel_session", "leb2_session", "XSRF-TOKEN"}
 	for _, cookie := range cookies {
-		cookieMap = append(cookieMap, playwright.OptionalCookie{
+		if contains(cList, cookie.Name) {
+			cookieList = append(cookieList, cookie)
+		}
+	}
+	return cookieList
+}
+
+func CookiesOptions(cookies []playwright.Cookie) []playwright.OptionalCookie {
+	var cookieOptions []playwright.OptionalCookie
+	cookies = CookieFilter(cookies)
+	for _, cookie := range cookies {
+		cookieOptions = append(cookieOptions, playwright.OptionalCookie{
 			Name:     cookie.Name,
 			Value:    cookie.Value,
 			Domain:   &cookie.Domain,
@@ -35,8 +55,9 @@ func CookiesToMap(cookies []playwright.Cookie) []playwright.OptionalCookie {
 			Secure:   &cookie.Secure,
 			SameSite: cookie.SameSite,
 		})
+
 	}
-	return cookieMap
+	return cookieOptions
 }
 
 func getAssignments(page playwright.Page, classID string) (ClassAssignments, error) {
@@ -50,7 +71,6 @@ func getAssignments(page playwright.Page, classID string) (ClassAssignments, err
 	if err != nil {
 		return ass, fmt.Errorf("could not wait for load: %v", err)
 	}
-	log.Println("Page loaded: ", time.Now().Unix())
 
 	classNameCode, err := page.Locator("p[name=code]").InnerText()
 	if err != nil {
@@ -101,25 +121,8 @@ func getAssignments(page playwright.Page, classID string) (ClassAssignments, err
 	return ass, nil
 }
 
-func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
-	pw, err := playwright.Run()
-	if err != nil {
-		return nil, fmt.Errorf("could not start Playwright: %v", err)
-	}
-	defer pw.Stop()
-
-	browser, err := pw.Chromium.Launch()
-	if err != nil {
-		return nil, fmt.Errorf("could not launch browser: %v", err)
-	}
-	defer browser.Close()
-
-	page, err := browser.NewPage()
-	if err != nil {
-		return nil, fmt.Errorf("could not create page: %v", err)
-	}
-
-	_, err = page.Goto("https://login1.leb2.org/login?app_id=1&redirect_uri=https%3A%2F%2Fapp.leb2.org%2Flogin")
+func LEB2Login(page playwright.Page, username string, password string) ([]playwright.Cookie, error) {
+	_, err := page.Goto("https://login1.leb2.org/login?app_id=1&redirect_uri=https%3A%2F%2Fapp.leb2.org%2Flogin")
 	if err != nil {
 		return nil, fmt.Errorf("could not goto login page: %v", err)
 	}
@@ -148,7 +151,45 @@ func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
 		return nil, fmt.Errorf("invalid credentials")
 	}
 
-	_, err = page.Goto("https://app.leb2.org/class")
+	cookie, err := page.Context().Cookies()
+	if err != nil {
+		return nil, fmt.Errorf("could not get cookies: %v", err)
+	}
+
+	cookie = CookieFilter(cookie)
+
+	return cookie, nil
+}
+
+func InitPlaywright() (playwright.Page, error) {
+	pw, err := playwright.Run()
+	if err != nil {
+		return nil, fmt.Errorf("could not start Playwright: %v", err)
+	}
+
+	browser, err := pw.Chromium.Launch(
+		playwright.BrowserTypeLaunchOptions{
+			Args: []string{
+				"--no-sandbox",
+				"--disable-setuid-sandbox",
+				"--disable-gl-drawing-for-tests",
+			},
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("could not launch browser: %v", err)
+	}
+
+	page, err := browser.NewPage()
+	if err != nil {
+		return nil, fmt.Errorf("could not create page: %v", err)
+	}
+
+	return page, err
+}
+
+func GetClassList(page playwright.Page) ([]string, error) {
+	_, err := page.Goto("https://app.leb2.org/class")
 	if err != nil {
 		return nil, fmt.Errorf("could not goto class list page: %v", err)
 	}
@@ -171,14 +212,11 @@ func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
 		}
 	})
 
-	// var wg sync.WaitGroup
-	// wg.Add(len(classList))
-	// var c SafeCounter
-	// cookies, err := page.Context().Cookies()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("could not get cookies: %v", err)
-	// }
-	// NewCockies := cookiesToMap(cookies)
+	return classList, nil
+}
+
+func GetAssignmentsSequence(page playwright.Page, classList []string) ([]ClassAssignments, error) {
+	defer page.Close()
 	var a []ClassAssignments
 	for _, classID := range classList {
 		ass, err := getAssignments(page, classID)
@@ -187,14 +225,53 @@ func ScrapeAssignments(username, password string) ([]ClassAssignments, error) {
 		}
 
 		a = append(a, ass)
+	}
 
-		// go func() {
-		// 	defer wg.Done()
-		// 	err := c.getAssignments(classID, NewCockies, browser)
-		// 	if err != nil {
-		// 		log.Printf("could not get assignments for class %s: %v", classID, err)
-		// 	}
-		// }()
+	return a, nil
+}
+
+func ScrapeAssignmentsByCookies(cookies []playwright.Cookie) ([]ClassAssignments, error) {
+	page, err := InitPlaywright()
+	if err != nil {
+		return nil, fmt.Errorf("could not start Playwright: %v", err)
+	}
+
+	page.Context().AddCookies(
+		CookiesOptions(cookies),
+	)
+
+	classList, err := GetClassList(page)
+	if err != nil {
+		return nil, fmt.Errorf("could not get class list: %v", err)
+	}
+
+	a, err := GetAssignmentsSequence(page, classList)
+	if err != nil {
+		return nil, fmt.Errorf("could not get assignments: %v", err)
+	}
+
+	return a, nil
+}
+
+func ScrapeAssignmentsByPassword(username, password string) ([]ClassAssignments, error) {
+	page, err := InitPlaywright()
+	if err != nil {
+		return nil, fmt.Errorf("could not start Playwright: %v", err)
+	}
+
+	_, err = LEB2Login(page, username, password)
+	if err != nil {
+		return nil, fmt.Errorf("could not login: %v", err)
+	}
+
+	classList, err := GetClassList(page)
+	if err != nil {
+		return nil, fmt.Errorf("could not get class list: %v", err)
+	}
+
+	a, err := GetAssignmentsSequence(page, classList)
+	if err != nil {
+		return nil, fmt.Errorf("could not get assignments: %v", err)
 	}
 
 	return a, nil

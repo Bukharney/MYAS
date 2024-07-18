@@ -7,7 +7,7 @@ import (
 
 type AssignmentsUsecase interface {
 	GetAssignments(*gin.Context) ([]scrapper.ClassAssignments, int, error)
-	GetAssignmentsNoLogin(*gin.Context, UserData) ([]scrapper.ClassAssignments, int, error)
+	GetAssignmentsNoLogin(*gin.Context, Leb2Credentials) ([]scrapper.ClassAssignments, int, error)
 }
 
 type Assignment struct {

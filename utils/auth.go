@@ -19,6 +19,7 @@ func GetTokenPart(c *gin.Context) (entities.ResToken, error) {
 		return tokenPart, fmt.Errorf("no token found")
 	}
 
+	tokenHeader = strings.Replace(tokenHeader, " ", "", -1)
 	token := strings.Split(tokenHeader, ";")
 
 	for _, t := range token {
@@ -58,7 +59,7 @@ func CheckToken(c *gin.Context, cfg *configs.Configs, tokenPart string, tokenTyp
 	return token, claims, err
 }
 
-func SignNewToken(cfg *configs.Configs, userId int, tokenType string) (string, error) {
+func SignNewToken(cfg *configs.Configs, userId string, tokenType string) (string, error) {
 	claims := &entities.AccessTokenCustomClaims{}
 	claims.UserID = userId
 	claims.IssuedAt = jwt.NewNumericDate(time.Now())
