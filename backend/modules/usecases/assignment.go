@@ -25,33 +25,34 @@ func NewAssignmentsUsecase(cfg *configs.Configs, authRepo entities.AuthRepositor
 func (u *AssignmentsUsecase) GetAssignments(c *gin.Context) ([]scrapper.ClassAssignments, int, error) {
 	tokenPart, err := utils.GetTokenPart(c)
 	if err != nil {
-		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("g")
+		return []scrapper.ClassAssignments{}, 401, err
 	}
 
 	if tokenPart.RefreshToken == "" {
-		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("h")
+		return []scrapper.ClassAssignments{}, 401, err
 	}
 
 	_, user, err := utils.CheckToken(c, u.Cfg, tokenPart.RefreshToken, "refresh")
 	if err != nil {
-		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("c")
+		return []scrapper.ClassAssignments{}, 401, err
 	}
 
 	redisUser, err := u.AuthRepo.GetUserById(user.UserID)
 	if err != nil {
-		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("i")
+		return []scrapper.ClassAssignments{}, 401, err
 	}
 
 	if redisUser.RefreshToken != tokenPart.RefreshToken {
-		return []scrapper.ClassAssignments{}, 401, nil
+		return []scrapper.ClassAssignments{}, 401, fmt.Errorf("invalid token")
 	}
 
 	assignments, err := scrapper.ScrapeAssignmentsByCookies(redisUser.Cookies)
 	if err != nil {
 		return []scrapper.ClassAssignments{}, 500, err
 	}
+
 	if len(assignments) == 0 {
-		return []scrapper.ClassAssignments{}, 500, nil
+		return []scrapper.ClassAssignments{}, 500, fmt.Errorf("no assignments found")
 	}
 
 	return assignments, 200, nil
