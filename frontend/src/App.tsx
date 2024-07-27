@@ -1,20 +1,22 @@
-import { useState } from "react";
-import "./index.css";
-import { Button } from "@/components/ui/button";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import Home from "./pages/home";
+import Login from "./pages/login";
+import TermsAndConditions from "./pages/t&c";
+import { SearchBarProvider } from "./provider/SearchBarProvider";
+import NotFound from "./pages/404";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <>
-      <div className="flex flex-col items-center justify-center h-screen">
-        <h1 className="text-4xl font-bold">Vite + React + Tailwind CSS</h1>
-        <p className="text-xl mt-4">Counter: {count}</p>
-        <Button onClick={() => setCount((count) => count + 1)}>
-          Increment
-        </Button>
-      </div>
-    </>
+    <SearchBarProvider>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/t&c" element={<TermsAndConditions />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </Router>
+    </SearchBarProvider>
   );
 }
 
