@@ -1,4 +1,4 @@
-import { Home } from "lucide-react";
+import { Dot, Home } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -19,8 +19,11 @@ import { useEffect, useContext, useState } from "react";
 import { data, ClassData, Assignment } from "@/data/assignment";
 
 import { SearchBarContext } from "@/provider/SearchBarProvider";
+import "../index.css";
+import { ModeToggle } from "@/components/mode-toggle";
 
 function HomePage() {
+  //set assignments
   const [assignments, setAssignments] = useState<ClassData[]>(data);
   const [groupedAssignments, setGroupedAssignments] = useState<Assignment[]>(
     []
@@ -126,16 +129,16 @@ function HomePage() {
   }, [sortBy, sortOrder, groupBy]);
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r bg-background sm:flex">
-        <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
+    <div className="flex min-h-screen w-full flex-col ">
+      <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
+        <nav className="flex flex-col items-center gap-4 px-2 sm:py-5 justify-between h-full">
           <a
             href="#"
             className="group flex h-9 w-9 shrink-0 items-center justify-center gap-2 rounded-full bg-primary text-lg font-semibold text-primary-foreground md:h-8 md:w-8 md:text-base"
           >
             <Home className="h-4 w-4 transition-all group-hover:scale-110" />
-            <span className="sr-only">Acme Inc</span>
           </a>
+          <ModeToggle />
         </nav>
       </aside>
       <div className="flex-1 sm:pl-14">
@@ -170,7 +173,7 @@ function HomePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {groupBy === "Assignment" && (
+                {groupBy === "Assignment" ? (
                   <>
                     {groupedAssignments.map(
                       (item, id) => (
@@ -179,7 +182,7 @@ function HomePage() {
                           <TableRow
                             key={id}
                             className={`grid grid-cols-6 ${
-                              i % 2 === 0 ? "bg-gray-200" : ""
+                              i % 2 === 0 ? " bg-muted" : ""
                             }`}
                           >
                             <TableCell className="col-span-1">
@@ -199,43 +202,69 @@ function HomePage() {
                       )
                     )}
                   </>
+                ) : (
+                  <>
+                    {assignments.map((item) => (
+                      <TableRow
+                        key={item.ClassName}
+                        className="grid grid-cols-6"
+                      >
+                        <TableCell className="col-span-1 border-r">
+                          {item.ClassName}
+                        </TableCell>
+                        <div className="col-span-5 text-wrap">
+                          {item.Assignments.reverse().map(
+                            (assignment, id) => (
+                              i++,
+                              (
+                                <TableRow
+                                  key={id}
+                                  className={`grid grid-cols-5 ${
+                                    i % 2 === 0 ? "bg-muted" : ""
+                                  }`}
+                                >
+                                  <TableCell className="col-span-2">
+                                    <span className="text-wrap">
+                                      {assignment.Name.split("_").join(" ")}
+                                    </span>
+                                  </TableCell>
+                                  <TableCell className="col-span-2">
+                                    {assignment.DueDate}
+                                  </TableCell>
+                                  <TableCell className="col-span-1 flex items-center ">
+                                    <Dot
+                                      style={{
+                                        filter:
+                                          assignment.Submission === "Submitted"
+                                            ? "drop-shadow(0 0 0.5rem #00ff00)"
+                                            : assignment.Submission ===
+                                              "Not Submitted"
+                                            ? "drop-shadow(0 0 0.5rem #ff0000)"
+                                            : "drop-shadow(0 0 0.5rem #ffff00)",
+                                      }}
+                                      color={`
+                                      ${
+                                        assignment.Submission === "Submitted"
+                                          ? "#00ff00"
+                                          : assignment.Submission ===
+                                            "Not Submitted"
+                                          ? "#ff0000"
+                                          : "#ffff00"
+                                      }
+                                      `}
+                                      size={48}
+                                    />
+                                    {assignment.Submission}
+                                  </TableCell>
+                                </TableRow>
+                              )
+                            )
+                          )}
+                        </div>
+                      </TableRow>
+                    ))}
+                  </>
                 )}
-              </TableBody>
-              <TableBody>
-                {assignments.map((item) => (
-                  <TableRow key={item.ClassName} className="grid grid-cols-6">
-                    <TableCell className="col-span-1 border-r">
-                      {item.ClassName}
-                    </TableCell>
-                    <div className="col-span-5 text-wrap">
-                      {item.Assignments.reverse().map(
-                        (assignment, id) => (
-                          i++,
-                          (
-                            <TableRow
-                              key={id}
-                              className={`grid grid-cols-5 ${
-                                i % 2 === 0 ? "bg-gray-200" : ""
-                              }`}
-                            >
-                              <TableCell className="col-span-2">
-                                <span className="text-wrap">
-                                  {assignment.Name.split("_").join(" ")}
-                                </span>
-                              </TableCell>
-                              <TableCell className="col-span-2">
-                                {assignment.DueDate}
-                              </TableCell>
-                              <TableCell className="col-span-1">
-                                {assignment.Submission}
-                              </TableCell>
-                            </TableRow>
-                          )
-                        )
-                      )}
-                    </div>
-                  </TableRow>
-                ))}
               </TableBody>
             </Table>
           </CardContent>
