@@ -1,6 +1,5 @@
 import { useContext, useEffect } from "react";
 
-import { SearchBarContext } from "@/provider/SearchBarProvider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,13 +12,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
-import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
 import { ArrowUpDown, CheckCheck, ListFilter, Trash2 } from "lucide-react";
 import { data } from "@/data/assignment";
-
-type CheckedList = {
-  [key: string]: DropdownMenuCheckboxItemProps["checked"];
-};
+import { SearchBarContext } from "@/provider/searchBarProvider";
 
 export const SearchBar = () => {
   const clssList = data.map((clss) => clss.ClassName);
@@ -27,16 +22,16 @@ export const SearchBar = () => {
   if (!context) {
     throw new Error("SearchBar must be used within a SearchBarProvider");
   }
-  const { sortBy, setSortBy, sortOrder, setSortOrder, groupBy, setGroupBy } =
-    context;
-
-  const [filter, setFilter] = useState<CheckedList>({
-    Late: true,
-    Not: true,
-    Done: true,
-    No: true,
-    ...Object.fromEntries(clssList.map((clss) => [clss, true])),
-  });
+  const {
+    filter,
+    setFilter,
+    sortBy,
+    setSortBy,
+    sortOrder,
+    setSortOrder,
+    groupBy,
+    setGroupBy,
+  } = context;
 
   useEffect(() => {});
 

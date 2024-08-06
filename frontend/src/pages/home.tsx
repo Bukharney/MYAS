@@ -18,9 +18,10 @@ import SearchBar from "./searchBar";
 import { useEffect, useContext, useState } from "react";
 import { data, ClassData, Assignment } from "@/data/assignment";
 
-import { SearchBarContext } from "@/provider/SearchBarProvider";
 import "../index.css";
 import { ModeToggle } from "@/components/mode-toggle";
+import { SearchBarContext } from "@/provider/searchBarProvider";
+import { CheckedList } from "@/provider/searchBarProvider";
 
 function HomePage() {
   //set assignments
@@ -32,7 +33,7 @@ function HomePage() {
   if (!context) {
     throw new Error("SearchBar must be used within a SearchBarProvider");
   }
-  const { sortBy, sortOrder, groupBy } = context;
+  const { sortBy, sortOrder, groupBy, filter } = context;
 
   const parseDate = (dateString: string): Date => {
     if (dateString === "No Due Date") {
@@ -51,6 +52,7 @@ function HomePage() {
       }`
     );
   };
+
   const group = (data: ClassData[]): Assignment[] => {
     const groupedData: Assignment[] = [];
     data.map((course) => {
@@ -62,7 +64,53 @@ function HomePage() {
     return groupedData;
   };
 
-  let i = 0;
+  const filterData = (data: ClassData[], filter: CheckedList) => {
+    const filteredData = data.map((course) => {
+      const filteredAssignments = course.Assignments.filter((assignment) => {
+        if (
+          filter[
+            assignment.Submission == "Late Submitted"
+              ? "Late"
+              : assignment.Submission == "Submitted"
+              ? "Done"
+              : "Not"
+          ] === false
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      const filteredDueDate = filteredAssignments.filter((assignment) => {
+        if (filter[assignment.DueDate == "No Due Date" ? "No" : ""] === false) {
+          return false;
+        }
+        return true;
+      });
+
+      return {
+        ...course,
+        Assignments: filteredDueDate,
+      };
+    });
+
+    filteredData.map((course) => {
+      if (course.Assignments.length === 0) {
+        course.Assignments.push({
+          Name: "No Assignments",
+          DueDate: "No Due Date",
+          Submission: "Not Submitted",
+        });
+      }
+    });
+
+    return filteredData;
+  };
+
+  useEffect(() => {
+    const filteredData = filterData(data, filter);
+    setAssignments(filteredData);
+  }, [filter]);
 
   useEffect(() => {
     const sortData = (
@@ -128,6 +176,7 @@ function HomePage() {
     sortData(data, sortBy, sortOrder, groupBy);
   }, [sortBy, sortOrder, groupBy]);
 
+  let i = 0;
   return (
     <div className="flex min-h-screen w-full flex-col ">
       <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
@@ -194,7 +243,27 @@ function HomePage() {
                             <TableCell className="col-span-2">
                               {item.DueDate}
                             </TableCell>
-                            <TableCell className="col-span-1">
+                            <TableCell className="col-span-1 flex items-center">
+                              <Dot
+                                style={{
+                                  filter:
+                                    item.Submission === "Submitted"
+                                      ? "drop-shadow(0 0 0.2rem #00ff00)"
+                                      : item.Submission === "Not Submitted"
+                                      ? "drop-shadow(0 0 0.2rem #ff0000)"
+                                      : "drop-shadow(0 0 0.2rem #ffff00)",
+                                }}
+                                color={`
+                                      ${
+                                        item.Submission === "Submitted"
+                                          ? "#00ff00"
+                                          : item.Submission === "Not Submitted"
+                                          ? "#ff0000"
+                                          : "#ffff00"
+                                      }
+                                      `}
+                                size={48}
+                              />
                               {item.Submission}
                             </TableCell>
                           </TableRow>
@@ -231,16 +300,16 @@ function HomePage() {
                                   <TableCell className="col-span-2">
                                     {assignment.DueDate}
                                   </TableCell>
-                                  <TableCell className="col-span-1 flex items-center ">
+                                  <TableCell className="col-span-1 flex items-center">
                                     <Dot
                                       style={{
                                         filter:
                                           assignment.Submission === "Submitted"
-                                            ? "drop-shadow(0 0 0.5rem #00ff00)"
+                                            ? "drop-shadow(0 0 0.2rem #00ff00)"
                                             : assignment.Submission ===
                                               "Not Submitted"
-                                            ? "drop-shadow(0 0 0.5rem #ff0000)"
-                                            : "drop-shadow(0 0 0.5rem #ffff00)",
+                                            ? "drop-shadow(0 0 0.2rem #ff0000)"
+                                            : "drop-shadow(0 0 0.2rem #ffff00)",
                                       }}
                                       color={`
                                       ${

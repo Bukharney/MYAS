@@ -14,7 +14,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 function Login() {
   return (
     <div className="w-full h-screen flex">
-      <main className="flex justify-center items-center bg-slate-50 w-full">
+      <main className="flex justify-center items-center  w-full">
         <Card className="w-[350px]">
           <CardHeader>
             <CardTitle>Login</CardTitle>
@@ -55,7 +55,7 @@ function Login() {
                   <div className="grid gap-1.5 leading-none">
                     <p className="text-xs">
                       By clicking the login button, you agree to our{" "}
-                      <a href="#" className="text-blue-500">
+                      <a href="/t&c" className="text-blue-500">
                         Terms and Conditions
                       </a>
                     </p>
