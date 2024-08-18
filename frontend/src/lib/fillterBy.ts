@@ -1,32 +1,15 @@
-import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 import { ClassData } from "@/data/assignment";
 import { CheckedList } from "@/provider/searchBarProvider";
 
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
-
-export const ParseDate = (dateString: string): Date => {
-  if (dateString === "No Due Date") {
-    return new Date("December 31, 9999 23:59");
-  }
-  const date = dateString.split(" at ")[0];
-  const time = dateString.split(" at ")[1];
-  const month = date.split(" ")[0];
-  const day = date.split(" ")[1].split(",")[0];
-  const year = date.split(" ")[2];
-  const hours = time.split(":")[0];
-  const minutes = time.split(":")[1];
-  return new Date(
-    `${month} ${day}, ${year} ${hours}:${
-      minutes.length === 1 ? "0" + minutes : minutes
-    }`
-  );
-};
-
 export const FilterData = (data: ClassData[], filter: CheckedList) => {
   const filteredData = data.map((course) => {
+    if (filter[course.ClassName] === false) {
+      return {
+        ...course,
+        Assignments: [],
+      };
+    }
+
     const filteredAssignments = course.Assignments.filter((assignment) => {
       if (
         filter[
@@ -49,13 +32,6 @@ export const FilterData = (data: ClassData[], filter: CheckedList) => {
       return true;
     });
 
-    return {
-      ...course,
-      Assignments: filteredDueDate,
-    };
-  });
-
-  filteredData.map((course) => {
     if (course.Assignments.length === 0) {
       course.Assignments.push({
         Name: "No Assignments",
@@ -63,7 +39,19 @@ export const FilterData = (data: ClassData[], filter: CheckedList) => {
         Submission: "Not Submitted",
       });
     }
+
+    return {
+      ...course,
+      Assignments: filteredDueDate,
+    };
   });
+
+  for (let i = 0; i < filteredData.length; i++) {
+    if (filteredData[i].Assignments.length === 0) {
+      filteredData.splice(i, 1);
+      i--;
+    }
+  }
 
   return filteredData;
 };

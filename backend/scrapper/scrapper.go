@@ -84,6 +84,11 @@ func getAssignments(page playwright.Page, classID string) (ClassAssignments, err
 
 	className := classNameCode + " : " + classNameLN
 
+	ass = ClassAssignments{
+		ClassName:   className,
+		Assignments: []Assignment{},
+	}
+
 	html, err := page.Locator("div.table-responsive").InnerHTML()
 	if err != nil {
 		return ass, fmt.Errorf("could not get assignments HTML: %v", err)
@@ -92,11 +97,6 @@ func getAssignments(page playwright.Page, classID string) (ClassAssignments, err
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(html))
 	if err != nil {
 		return ass, fmt.Errorf("could not parse assignments HTML: %v", err)
-	}
-
-	ass = ClassAssignments{
-		ClassName:   className,
-		Assignments: []Assignment{},
 	}
 
 	doc.Find("tr").Each(func(i int, s *goquery.Selection) {
@@ -184,6 +184,9 @@ func InitPlaywright() (playwright.Page, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create page: %v", err)
 	}
+
+	page.SetViewportSize(1920, 1080)
+	page.SetDefaultTimeout(10000)
 
 	return page, err
 }

@@ -1,3 +1,4 @@
+import "../index.css";
 import { Dot, Home } from "lucide-react";
 import {
   Table,
@@ -16,164 +17,51 @@ import {
 } from "@/components/ui/card";
 import SearchBar from "./searchBar";
 import { useEffect, useContext, useState } from "react";
-import { data, ClassData, Assignment } from "@/data/assignment";
-
-import "../index.css";
+import { ClassData, data } from "@/data/assignment";
 import { ModeToggle } from "@/components/mode-toggle";
 import { SearchBarContext } from "@/provider/searchBarProvider";
-import { CheckedList } from "@/provider/searchBarProvider";
+import { AssignmentsContext } from "@/provider/assignmentsProvider";
+import { FilterData } from "@/lib/fillterBy";
+import { GroupByAssignment, GroupByClass } from "@/lib/sortBy";
 
 function HomePage() {
-  //set assignments
-  const [assignments, setAssignments] = useState<ClassData[]>(data);
-  const [groupedAssignments, setGroupedAssignments] = useState<Assignment[]>(
-    []
-  );
+  const contextAssignments = useContext(AssignmentsContext);
+  if (!contextAssignments) {
+    throw new Error("Assignments must be used within a AssignmentsProvider");
+  }
+
+  const {
+    assignments,
+    setAssignments,
+    groupedAssignments,
+    setGroupedAssignments,
+  } = contextAssignments;
+
   const context = useContext(SearchBarContext);
   if (!context) {
     throw new Error("SearchBar must be used within a SearchBarProvider");
   }
+
   const { sortBy, sortOrder, groupBy, filter } = context;
 
-  const parseDate = (dateString: string): Date => {
-    if (dateString === "No Due Date") {
-      return new Date("December 31, 9999 23:59");
+  setAssignments(data);
+
+  const [displayAssignments, setDisplayAssignments] =
+    useState<ClassData[]>(assignments);
+
+  useEffect(() => {
+    const filteredData = FilterData(assignments, filter);
+    setDisplayAssignments(filteredData);
+  }, [assignments, filter]);
+
+  useEffect(() => {
+    if (groupBy === "Class") {
+      const a = GroupByClass(displayAssignments, sortOrder, sortBy);
+      setDisplayAssignments(a);
+    } else {
+      const a = GroupByAssignment(displayAssignments, sortOrder, sortBy);
+      setGroupedAssignments(a);
     }
-    const date = dateString.split(" at ")[0];
-    const time = dateString.split(" at ")[1];
-    const month = date.split(" ")[0];
-    const day = date.split(" ")[1].split(",")[0];
-    const year = date.split(" ")[2];
-    const hours = time.split(":")[0];
-    const minutes = time.split(":")[1];
-    return new Date(
-      `${month} ${day}, ${year} ${hours}:${
-        minutes.length === 1 ? "0" + minutes : minutes
-      }`
-    );
-  };
-
-  const group = (data: ClassData[]): Assignment[] => {
-    const groupedData: Assignment[] = [];
-    data.map((course) => {
-      course.Assignments.map((assignment) => {
-        assignment.ClassName = course.ClassName;
-        groupedData.push(assignment);
-      });
-    });
-    return groupedData;
-  };
-
-  const filterData = (data: ClassData[], filter: CheckedList) => {
-    const filteredData = data.map((course) => {
-      const filteredAssignments = course.Assignments.filter((assignment) => {
-        if (
-          filter[
-            assignment.Submission == "Late Submitted"
-              ? "Late"
-              : assignment.Submission == "Submitted"
-              ? "Done"
-              : "Not"
-          ] === false
-        ) {
-          return false;
-        }
-        return true;
-      });
-
-      const filteredDueDate = filteredAssignments.filter((assignment) => {
-        if (filter[assignment.DueDate == "No Due Date" ? "No" : ""] === false) {
-          return false;
-        }
-        return true;
-      });
-
-      return {
-        ...course,
-        Assignments: filteredDueDate,
-      };
-    });
-
-    filteredData.map((course) => {
-      if (course.Assignments.length === 0) {
-        course.Assignments.push({
-          Name: "No Assignments",
-          DueDate: "No Due Date",
-          Submission: "Not Submitted",
-        });
-      }
-    });
-
-    return filteredData;
-  };
-
-  useEffect(() => {
-    const filteredData = filterData(data, filter);
-    setAssignments(filteredData);
-  }, [filter]);
-
-  useEffect(() => {
-    const sortData = (
-      data: ClassData[],
-      sortBy: string,
-      orderBy: string,
-      groupBy: string
-    ) => {
-      if (groupBy === "Class") {
-        const c = data.map((course) => {
-          const sortedAssignments = [...course.Assignments];
-          switch (sortBy) {
-            case "Status":
-              sortedAssignments.sort((a, b) =>
-                a.Submission.localeCompare(b.Submission)
-              );
-              break;
-            case "DueDate":
-              sortedAssignments.sort((a, b) => {
-                const dateA = parseDate(a.DueDate);
-                const dateB = parseDate(b.DueDate);
-                return dateA.getTime() - dateB.getTime();
-              });
-              break;
-          }
-
-          if (orderBy === "Descending") {
-            sortedAssignments.reverse();
-          }
-
-          return {
-            ...course,
-            Assignments: sortedAssignments,
-          };
-        });
-
-        setAssignments(c);
-      } else {
-        const Assignments = group(data);
-        switch (sortBy) {
-          case "Status":
-            Assignments.sort((a, b) =>
-              a.Submission.localeCompare(b.Submission)
-            );
-            break;
-          case "DueDate":
-            Assignments.sort((a, b) => {
-              const dateA = parseDate(a.DueDate);
-              const dateB = parseDate(b.DueDate);
-              return dateA.getTime() - dateB.getTime();
-            });
-            break;
-        }
-
-        if (orderBy === "Descending") {
-          Assignments.reverse();
-        }
-
-        setGroupedAssignments(Assignments);
-      }
-    };
-
-    sortData(data, sortBy, sortOrder, groupBy);
   }, [sortBy, sortOrder, groupBy]);
 
   let i = 0;
@@ -273,7 +161,7 @@ function HomePage() {
                   </>
                 ) : (
                   <>
-                    {assignments.map((item) => (
+                    {displayAssignments.map((item) => (
                       <TableRow
                         key={item.ClassName}
                         className="grid grid-cols-6"

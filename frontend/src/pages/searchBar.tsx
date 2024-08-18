@@ -1,5 +1,4 @@
-import { useContext, useEffect } from "react";
-
+import { useContext } from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -32,8 +31,6 @@ export const SearchBar = () => {
     groupBy,
     setGroupBy,
   } = context;
-
-  useEffect(() => {});
 
   const [open, setOpen] = useState(false);
 
