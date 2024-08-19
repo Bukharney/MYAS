@@ -15,6 +15,7 @@ import Login from "@/api/login";
 import GetAssignmentsNoLogin from "@/api/assignment";
 import { useContext } from "react";
 import { AssignmentsContext } from "@/provider/assignmentsProvider";
+import { useNavigate } from "react-router-dom";
 import "@/index.css";
 
 function LoginPage() {
@@ -22,9 +23,9 @@ function LoginPage() {
   if (!context) {
     throw new Error("SearchBar must be used within a SearchBarProvider");
   }
-
   const { setAssignments } = context;
 
+  const navigate = useNavigate();
   const [checked, setChecked] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
 
@@ -58,7 +59,7 @@ function LoginPage() {
         });
 
       setLoading(false);
-      window.location.href = "/";
+      navigate("/");
     } else {
       await GetAssignmentsNoLogin(username, password)
         .then((res) => {
@@ -69,7 +70,7 @@ function LoginPage() {
         });
 
       setLoading(false);
-      window.location.href = "/";
+      navigate("/");
     }
   };
 
