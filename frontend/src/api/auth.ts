@@ -1,5 +1,5 @@
 const Login = async (username: string, password: string) => {
-  const response = await fetch("/api/auth/login", {
+  const response = await fetch("/api/v1/auth/login", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -11,7 +11,7 @@ const Login = async (username: string, password: string) => {
 };
 
 const Logout = async () => {
-  const response = await fetch("/api/auth/logout", {
+  const response = await fetch("/api/v1/auth/logout", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -36,7 +36,7 @@ const Logout = async () => {
 };
 
 const Refresh = async () => {
-  const response = await fetch("/api/auth/refresh-token", {
+  const response = await fetch("/api/v1/auth/refresh-token", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
