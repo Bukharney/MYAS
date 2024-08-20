@@ -14,4 +14,16 @@ const GetAssignmentsNoLogin = async (username: string, password: string) => {
   }
 };
 
-export default GetAssignmentsNoLogin;
+const GetAssignments = async () => {
+  const response = await fetch("/api/assignment/", {
+    method: "GET",
+  });
+
+  if (response.ok) {
+    return response.json();
+  } else {
+    throw new Error("Failed to get assignments");
+  }
+};
+
+export { GetAssignments, GetAssignmentsNoLogin };

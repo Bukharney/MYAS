@@ -11,8 +11,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import React from "react";
-import Login from "@/api/login";
-import GetAssignmentsNoLogin from "@/api/assignment";
+import { Login } from "@/api/auth";
+import { GetAssignmentsNoLogin, GetAssignments } from "@/api/assignment";
 import { useContext } from "react";
 import { AssignmentsContext } from "@/provider/assignmentsProvider";
 import { useNavigate } from "react-router-dom";
@@ -38,39 +38,35 @@ function LoginPage() {
 
     setLoading(true);
     if (checked) {
-      await Login(username, password)
-        .then((res) => {
-          if (res.ok) {
-            console.log("Login successful");
-          } else {
-            console.log("Login failed");
-          }
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-
-      GetAssignmentsNoLogin(username, password)
-        .then((res) => {
-          setAssignments(res);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-
-      setLoading(false);
-      navigate("/");
+      try {
+        const response = await Login(username, password);
+        if (response.ok) {
+          const data = await GetAssignments();
+          setAssignments(data);
+          navigate("/");
+        } else {
+          throw new Error("Failed to login");
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     } else {
-      await GetAssignmentsNoLogin(username, password)
-        .then((res) => {
-          setAssignments(res);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
-
-      setLoading(false);
-      navigate("/");
+      try {
+        const response = await GetAssignmentsNoLogin(username, password);
+        if (response.ok) {
+          const data = await response.json();
+          setAssignments(data);
+          navigate("/");
+        } else {
+          throw new Error("Failed to login");
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
     }
   };
 

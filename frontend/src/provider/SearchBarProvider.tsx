@@ -1,4 +1,3 @@
-import { data } from "@/data/assignment";
 import { DropdownMenuCheckboxItemProps } from "@radix-ui/react-dropdown-menu";
 import {
   createContext,
@@ -6,8 +5,9 @@ import {
   ReactNode,
   Dispatch,
   SetStateAction,
+  useContext,
 } from "react";
-
+import { AssignmentsContext } from "./assignmentsProvider";
 export type CheckedList = {
   [key: string]: DropdownMenuCheckboxItemProps["checked"];
 };
@@ -21,6 +21,7 @@ interface SearchBarContextProps {
   setSortOrder: Dispatch<SetStateAction<string>>;
   groupBy: string;
   setGroupBy: Dispatch<SetStateAction<string>>;
+  classList: string[];
 }
 
 const SearchBarContext = createContext<SearchBarContextProps | undefined>(
@@ -28,8 +29,16 @@ const SearchBarContext = createContext<SearchBarContextProps | undefined>(
 );
 
 const SearchBarProvider = ({ children }: { children: ReactNode }) => {
-  const clssList = data.map((clss) => clss.ClassName);
+  const context = useContext(AssignmentsContext);
+  if (!context) {
+    throw new Error("SearchBar must be used within a SearchBarProvider");
+  }
 
+  const { assignments } = context;
+
+  const classList = Array.from(
+    new Set(assignments.map((assignment) => assignment.ClassName))
+  );
   const [sortBy, setSortBy] = useState<string>("Status");
   const [sortOrder, setSortOrder] = useState<string>("Ascending");
   const [groupBy, setGroupBy] = useState<string>("Class");
@@ -38,7 +47,7 @@ const SearchBarProvider = ({ children }: { children: ReactNode }) => {
     Not: true,
     Done: true,
     No: true,
-    ...Object.fromEntries(clssList.map((clss) => [clss, true])),
+    ...Object.fromEntries(classList.map((clss) => [clss, true])),
   });
 
   const value = {
@@ -50,6 +59,7 @@ const SearchBarProvider = ({ children }: { children: ReactNode }) => {
     setSortOrder,
     groupBy,
     setGroupBy,
+    classList,
   };
 
   return (

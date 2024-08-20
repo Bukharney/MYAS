@@ -152,15 +152,15 @@ function HomePage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {groupedAssignments.length === 0 && (
-                      <TableRow className="grid grid-cols-6">
-                        <TableCell className="col-span-6 text-center">
-                          No Assignments
-                        </TableCell>
-                      </TableRow>
-                    )}
                     {groupBy === "Assignment" ? (
                       <>
+                        {groupedAssignments.length === 0 && (
+                          <TableRow className="grid grid-cols-6">
+                            <TableCell className="col-span-6 text-center">
+                              No Assignments
+                            </TableCell>
+                          </TableRow>
+                        )}
                         {groupedAssignments.map(
                           (item, id) => (
                             i++,
@@ -210,6 +210,13 @@ function HomePage() {
                       </>
                     ) : (
                       <>
+                        {displayAssignments.length === 0 && (
+                          <TableRow className="grid grid-cols-6">
+                            <TableCell className="col-span-6 text-center">
+                              No Assignments
+                            </TableCell>
+                          </TableRow>
+                        )}
                         {displayAssignments.map((item) => (
                           <TableRow
                             key={item.ClassName}
@@ -225,7 +232,7 @@ function HomePage() {
                                   (
                                     <TableRow
                                       key={id}
-                                      className={`grid grid-cols-5 ${
+                                      className={`grid grid-cols-5 h-full ${
                                         i % 2 === 0 ? "bg-muted" : ""
                                       }`}
                                     >

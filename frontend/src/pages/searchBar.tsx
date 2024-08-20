@@ -12,11 +12,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useState } from "react";
 import { ArrowUpDown, CheckCheck, ListFilter, Trash2 } from "lucide-react";
-import { data } from "@/data/assignment";
 import { SearchBarContext } from "@/provider/searchBarProvider";
 
 export const SearchBar = () => {
-  const clssList = data.map((clss) => clss.ClassName);
   const context = useContext(SearchBarContext);
   if (!context) {
     throw new Error("SearchBar must be used within a SearchBarProvider");
@@ -30,6 +28,7 @@ export const SearchBar = () => {
     setSortOrder,
     groupBy,
     setGroupBy,
+    classList,
   } = context;
 
   const [open, setOpen] = useState(false);
@@ -173,7 +172,9 @@ export const SearchBar = () => {
                 onClick={() =>
                   setFilter({
                     ...filter,
-                    ...Object.fromEntries(clssList.map((clss) => [clss, true])),
+                    ...Object.fromEntries(
+                      classList.map((clss) => [clss, true])
+                    ),
                   })
                 }
               >
@@ -187,7 +188,7 @@ export const SearchBar = () => {
                   setFilter({
                     ...filter,
                     ...Object.fromEntries(
-                      clssList.map((clss) => [clss, false])
+                      classList.map((clss) => [clss, false])
                     ),
                   })
                 }
@@ -197,7 +198,7 @@ export const SearchBar = () => {
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          {clssList.map((clss) => (
+          {classList.map((clss) => (
             <DropdownMenuCheckboxItem
               key={clss}
               checked={filter[clss]}

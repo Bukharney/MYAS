@@ -9,9 +9,9 @@ import { AssignmentsProvider } from "./provider/assignmentsProvider";
 
 function App() {
   return (
-    <SearchBarProvider>
-      <ThemeProvider>
-        <AssignmentsProvider>
+    <ThemeProvider>
+      <AssignmentsProvider>
+        <SearchBarProvider>
           <Router>
             <Routes>
               <Route path="/" element={<Home />} />
@@ -20,9 +20,9 @@ function App() {
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Router>
-        </AssignmentsProvider>
-      </ThemeProvider>
-    </SearchBarProvider>
+        </SearchBarProvider>
+      </AssignmentsProvider>
+    </ThemeProvider>
   );
 }
 
