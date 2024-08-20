@@ -17,7 +17,6 @@ export default defineConfig({
       "/api": {
         target: "http://myas_server:8080",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, "/v1"),
       },
     },
   },
