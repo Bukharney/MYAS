@@ -14,11 +14,16 @@ variables:
   DOCKER_TLS_CERTDIR: "/certs"
   CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
   CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:latest
-  POSTGRES_PASSWORD: $POSTGRES_PASSWORD
-  POSTGRES_USER: $POSTGRES_USER
-  POSTGRES_DB: $POSTGRES_DB
-  POSTGRES_HOST: $POSTGRES_HOST
-  POSTGRES_PORT: $POSTGRES_PORT
+  REDIS_HOST: $REDIS_HOST
+  REDIS_PORT: $REDIS_PORT
+  REDIS_PASSWORD: $REDIS_PASSWORD
+  REDIS_DB: $REDIS_DB
+  AES_KEY: $AES_KEY
+  JWT_ACCESS_SECRET: $JWT_ACCESS_SECRET
+  JWT_REFRESH_SECRET: $JWT_REFRESH_SECRET
+  ACCESS_TOKEN_EXPIRES_IN: $ACCESS_TOKEN_EXPIRES_IN
+  REFRESH_TOKEN_EXPIRES_IN: $REFRESH_TOKEN_EXPIRES_IN
+  VERIFICATION_EXPIRES_IN: $VERIFICATION_EXPIRES_IN
 
 build_frontend:
   stage: build
@@ -27,9 +32,9 @@ build_frontend:
   script:
     - docker build --pull -t "$CONTAINER_TEST_IMAGE"_frontend ./frontend
     - docker push "$CONTAINER_TEST_IMAGE"_frontend
-  rules:
-    - changes:
-        - frontend/**/*
+  # rules:
+  #   - changes:
+  #       - frontend/**/*
 
 build_backend:
   stage: build
@@ -39,9 +44,9 @@ build_backend:
   script:
     - docker build --pull -t "$CONTAINER_TEST_IMAGE"_backend ./backend
     - docker push "$CONTAINER_TEST_IMAGE"_backend
-  rules:
-    - changes:
-        - backend/**/*
+  # rules:
+  #   - changes:
+  #       - backend/**/*
 
 deploy:
   stage: deploy
