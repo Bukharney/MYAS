@@ -1,7 +1,7 @@
 import { Refresh } from "./auth";
 
 const GetAssignmentsNoLogin = async (username: string, password: string) => {
-  const response = await fetch("/api/assignment/no-login", {
+  const response = await fetch("/api/v1/assignment/no-login", {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -17,7 +17,7 @@ const GetAssignmentsNoLogin = async (username: string, password: string) => {
 };
 
 const GetAssignments = async () => {
-  const response = await fetch("/api/assignment/", {
+  const response = await fetch("/api/v1/assignment/", {
     method: "GET",
   });
 
