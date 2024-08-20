@@ -1,5 +1,5 @@
 import "../index.css";
-import { Dot, Home, LogInIcon } from "lucide-react";
+import { Dot, Home, LogInIcon, LogOutIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -32,7 +32,10 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { GetAssignments } from "@/api/assignment";
+import { useNavigate } from "react-router-dom";
+import { Logout } from "@/api/auth";
 function HomePage() {
+  const nevigate = useNavigate();
   const contextAssignments = useContext(AssignmentsContext);
   if (!contextAssignments) {
     throw new Error("Assignments must be used within a AssignmentsProvider");
@@ -54,19 +57,23 @@ function HomePage() {
     useState<ClassData[]>(assignments);
 
   useEffect(() => {
+    if (assignments.length !== 0) {
+      return;
+    }
     const GetAss = async () => {
       try {
         setLoading(true);
         const ass = await GetAssignments();
         setAssignments(ass);
-        setLoading(false);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
     GetAss();
-  }, [setAssignments]);
+  }, [assignments.length, setAssignments]);
 
   useEffect(() => {
     const filteredData = FilterData(assignments, filter);
@@ -119,8 +126,31 @@ function HomePage() {
                       <Button
                         variant="outline"
                         size="icon"
+                        onClick={async () => {
+                          await Logout();
+                          nevigate("/login");
+                        }}
+                      >
+                        <LogOutIcon className="h-6 w-6" />
+                        <span className="sr-only">Login</span>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Logout</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </div>
+              <div className="py-1">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      {" "}
+                      <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => {
-                          window.location.href = "/login";
+                          nevigate("/login");
                         }}
                       >
                         <LogInIcon className="h-6 w-6" />

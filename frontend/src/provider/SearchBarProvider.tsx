@@ -6,6 +6,7 @@ import {
   Dispatch,
   SetStateAction,
   useContext,
+  useEffect,
 } from "react";
 import { AssignmentsContext } from "./assignmentsProvider";
 export type CheckedList = {
@@ -49,6 +50,19 @@ const SearchBarProvider = ({ children }: { children: ReactNode }) => {
     No: true,
     ...Object.fromEntries(classList.map((clss) => [clss, true])),
   });
+
+  useEffect(() => {
+    const classList = Array.from(
+      new Set(assignments.map((assignment) => assignment.ClassName))
+    );
+    setFilter({
+      Late: true,
+      Not: true,
+      Done: true,
+      No: true,
+      ...Object.fromEntries(classList.map((clss) => [clss, true])),
+    });
+  }, [assignments]);
 
   const value = {
     filter,

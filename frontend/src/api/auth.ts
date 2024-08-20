@@ -18,7 +18,21 @@ const Logout = async () => {
     },
   });
 
-  return response;
+  if (response.ok) {
+    return response;
+  } else {
+    if (response.status === 403) {
+      await Refresh().then((response) => {
+        if (response.ok) {
+          return Logout();
+        } else {
+          throw new Error("Failed to logout");
+        }
+      });
+    } else {
+      throw new Error("Failed to logout");
+    }
+  }
 };
 
 const Refresh = async () => {

@@ -25,8 +25,15 @@ const GetAssignments = async () => {
     return response.json();
   } else {
     if (response.status === 403) {
-      await Refresh();
-      return GetAssignments();
+      await Refresh().then((response) => {
+        if (response.ok) {
+          return GetAssignments();
+        } else {
+          throw new Error("Failed to get assignments");
+        }
+      });
+    } else {
+      throw new Error("Failed to get assignments");
     }
   }
 };
