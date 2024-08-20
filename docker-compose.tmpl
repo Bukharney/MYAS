@@ -1,63 +1,63 @@
 services:
-    myas_client:
-        image: $CI_REGISTRY_IMAGE:main_frontend
-        container_name: myasClient
-        environment:
-        - HOST=$HOST
-        expose:
-        - 5173
-        networks:
-        - caddy_net
+  myas_client:
+    image: $CI_REGISTRY_IMAGE:main_frontend
+    container_name: myasClient
+    environment:
+      - HOST=$HOST
+    expose:
+      - 5173
+    networks:
+      - caddy_net
 
-    myas_server:
-        image: $CI_REGISTRY_IMAGE:main_backend
-        container_name: myasServer
-        expose:
-        - 8080
-        - 443
-        environment:
-        - REDIS_HOST=${REDIS_HOST}
-        - REDIS_PORT=${REDIS_PORT}
-        - REDIS_PASSWORD=${REDIS_PASSWORD}
-        - REDIS_DB=${REDIS_DB}
-        - AES_KEY=${AES_KEY}
-        - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-        - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-        - ACCESS_TOKEN_EXPIRES_IN=${ACCESS_TOKEN_EXPIRES_IN}
-        - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
-        - VERIFICATION_EXPIRES_IN=${VERIFICATION_EXPIRES_IN}
-        depends_on:
-            myas_redis:
-                condition: service_healthy
-        networks:
-        - caddy_net
+  myas_server:
+    image: $CI_REGISTRY_IMAGE:main_backend
+    container_name: myasServer
+    expose:
+      - 8080
+      - 443
+    environment:
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_DB=${REDIS_DB}
+      - AES_KEY=${AES_KEY}
+      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
+      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
+      - ACCESS_TOKEN_EXPIRES_IN=${ACCESS_TOKEN_EXPIRES_IN}
+      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
+      - VERIFICATION_EXPIRES_IN=${VERIFICATION_EXPIRES_IN}
+    depends_on:
+      myas_redis:
+        condition: service_healthy
+    networks:
+      - caddy_net
 
-    myas_redis:
-        container_name: myas_redis
-        image: redis:alpine
-        ports:
-        - "6379:6379"
-        volumes:
-        - ./data:/data
-        environment:
-        - REDIS_REQUIREPASS=${REDIS_PASSWORD}
-        healthcheck:
-            test:
-                [
-                "CMD",
-                "redis-cli",
-                "-h",
-                "localhost",
-                "-p",
-                "6379",
-                "-a",
-                "${REDIS_PASSWORD}",
-                "ping",
-                ]
-            interval: 5s
-            timeout: 5s
-            retries: 3
-        command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
+  myas_redis:
+    container_name: myas_redis
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data:/data
+    environment:
+      - REDIS_REQUIREPASS=${REDIS_PASSWORD}
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-h",
+          "localhost",
+          "-p",
+          "6379",
+          "-a",
+          "${REDIS_PASSWORD}",
+          "ping",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD}"]
 
 networks:
   caddy_net:
