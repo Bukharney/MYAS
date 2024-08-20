@@ -1,3 +1,5 @@
+import { Refresh } from "./auth";
+
 const GetAssignmentsNoLogin = async (username: string, password: string) => {
   const response = await fetch("/api/assignment/no-login", {
     method: "GET",
@@ -22,7 +24,10 @@ const GetAssignments = async () => {
   if (response.ok) {
     return response.json();
   } else {
-    throw new Error("Failed to get assignments");
+    if (response.status === 403) {
+      await Refresh();
+      return GetAssignments();
+    }
   }
 };
 

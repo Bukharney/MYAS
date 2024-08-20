@@ -31,12 +31,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { GetAssignments } from "@/api/assignment";
 function HomePage() {
   const contextAssignments = useContext(AssignmentsContext);
   if (!contextAssignments) {
     throw new Error("Assignments must be used within a AssignmentsProvider");
   }
-  const { assignments } = contextAssignments;
+  const { assignments, setAssignments } = contextAssignments;
 
   const context = useContext(SearchBarContext);
   if (!context) {
@@ -44,6 +45,7 @@ function HomePage() {
   }
   const { sortBy, sortOrder, groupBy, filter } = context;
 
+  const [loading, setLoading] = useState(false);
   const [filteredData, setFilteredData] = useState<ClassData[]>([]);
   const [groupedAssignments, setGroupedAssignments] = useState<Assignment[]>(
     []
@@ -52,7 +54,21 @@ function HomePage() {
     useState<ClassData[]>(assignments);
 
   useEffect(() => {
-    console.log(assignments);
+    const GetAss = async () => {
+      try {
+        setLoading(true);
+        const ass = await GetAssignments();
+        setAssignments(ass);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    GetAss();
+  }, [setAssignments]);
+
+  useEffect(() => {
     const filteredData = FilterData(assignments, filter);
     setFilteredData(filteredData);
   }, [assignments, filter]);
@@ -70,7 +86,22 @@ function HomePage() {
   let i = 0;
   return (
     <>
-      <div className="flex min-h-screen w-full flex-col">
+      {loading && (
+        <div className="fixed inset-0 flex justify-center items-center bg-white bg-opacity-10 z-50">
+          <div className="flex justify-center items-center flex-col">
+            <span className="loader"></span>
+            <p className="text-l mt-2">Getting your assignments</p>
+            <p className="text-s text-gray-400">
+              This may take around 1 minute
+            </p>
+          </div>
+        </div>
+      )}
+      <div
+        className={`flex min-h-screen w-full flex-col ${
+          loading ? "opacity-10" : ""
+        }`}
+      >
         <aside className="fixed inset-y-0 left-0 z-10 hidden w-14 flex-col border-r sm:flex">
           <nav className="flex flex-col items-center gap-4 px-2 sm:py-5 justify-between h-full">
             <a
@@ -232,7 +263,7 @@ function HomePage() {
                                   (
                                     <TableRow
                                       key={id}
-                                      className={`grid grid-cols-5 h-full ${
+                                      className={`grid grid-cols-5 ${
                                         i % 2 === 0 ? "bg-muted" : ""
                                       }`}
                                     >
