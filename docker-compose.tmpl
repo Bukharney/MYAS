@@ -16,7 +16,7 @@ services:
         - 8080
         - 443
         environment:
-        - REDIS_HOST=redis
+        - REDIS_HOST=${REDIS_HOST}
         - REDIS_PORT=${REDIS_PORT}
         - REDIS_PASSWORD=${REDIS_PASSWORD}
         - REDIS_DB=${REDIS_DB}
