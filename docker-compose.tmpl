@@ -12,9 +12,8 @@ services:
   myas_server:
     image: $CI_REGISTRY_IMAGE:main_backend
     container_name: myasServer
-    expose:
-      - 8080
-      - 443
+    ports:
+      - "8088:8080"
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
