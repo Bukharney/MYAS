@@ -39,14 +39,15 @@ function LoginPage() {
     setLoading(true);
     if (checked) {
       try {
-        const response = await Login(username, password);
-        if (response.ok) {
-          const data = await GetAssignments();
-          setAssignments(data);
-          navigate("/");
-        } else {
-          throw new Error("Failed to login");
-        }
+        await Login(username, password).then(async (res) => {
+          if (!res.ok) {
+            throw new Error("Failed to login");
+          }
+          await GetAssignments().then((data) => {
+            setAssignments(data);
+            navigate("/");
+          });
+        });
       } catch (error) {
         console.error(error);
       } finally {
@@ -54,14 +55,10 @@ function LoginPage() {
       }
     } else {
       try {
-        const response = await GetAssignmentsNoLogin(username, password);
-        if (response.ok) {
-          const data = await response.json();
+        await GetAssignmentsNoLogin(username, password).then((data) => {
           setAssignments(data);
           navigate("/");
-        } else {
-          throw new Error("Failed to login");
-        }
+        });
       } catch (error) {
         console.error(error);
       } finally {

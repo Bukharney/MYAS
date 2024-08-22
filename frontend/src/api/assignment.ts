@@ -29,11 +29,11 @@ const GetAssignments = async () => {
         if (response.ok) {
           return GetAssignments();
         } else {
-          throw new Error("Failed to get assignments");
+          console.error("Failed to refresh token");
         }
       });
     } else {
-      throw new Error("Failed to get assignments");
+      console.log(response);
     }
   }
 };
