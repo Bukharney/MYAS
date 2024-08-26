@@ -74,8 +74,7 @@ jobs:
           PORT=22
 
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin ${{ secrets.AWS_ACCOUNT_ID }}.dkr.ecr.${{ secrets.AWS_REGION }}.amazonaws.com
-
+            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
             docker pull public.ecr.aws/z4n6o0v4/myas/client:latest
             docker pull public.ecr.aws/z4n6o0v4/myas/server:latest
 
