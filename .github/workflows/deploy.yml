@@ -26,7 +26,7 @@ jobs:
       - name: Login to Amazon ECR
         id: ecr-login
         run: |
-          aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
+          aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
 
       - name: Build and Push Docker Images
         run: |
@@ -74,7 +74,7 @@ jobs:
           PORT=22
 
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            aws ecr get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
+            aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
             docker pull public.ecr.aws/z4n6o0v4/myas/client:latest
             docker pull public.ecr.aws/z4n6o0v4/myas/server:latest
 
