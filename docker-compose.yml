@@ -1,6 +1,6 @@
 services:
   myas_client:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/myas/client:latest
+    image: public.ecr.aws/z4n6o0v4/myas/client:latest
     container_name: myas_client
     expose:
       - 5173
@@ -8,7 +8,7 @@ services:
       - caddy_net
 
   myas_server:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/myas/server:latest
+    image: public.ecr.aws/z4n6o0v4/myas/server:latest
     container_name: myas_server
     ports:
       - "8088:8080"
