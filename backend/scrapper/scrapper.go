@@ -186,7 +186,6 @@ func InitPlaywright() (playwright.Page, error) {
 	}
 
 	page.SetViewportSize(1920, 1080)
-	page.SetDefaultTimeout(10000)
 
 	return page, err
 }
@@ -252,6 +251,8 @@ func ScrapeAssignmentsByCookies(cookies []playwright.Cookie) ([]ClassAssignments
 	if err != nil {
 		return nil, fmt.Errorf("could not get assignments: %v", err)
 	}
+
+	page.Close()
 
 	return a, nil
 }
