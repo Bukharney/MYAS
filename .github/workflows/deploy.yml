@@ -26,7 +26,7 @@ jobs:
       - name: Login to Amazon ECR
         id: ecr-login
         run: |
-          aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
+          aws ecr-public get-login-password --region ${{ secrets.AWS_REGION }} | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
 
       - name: Build and Push Docker Images
         run: |
@@ -65,7 +65,7 @@ jobs:
           USER=${{ secrets.EC2_USER }}
           PORT=22
 
-          scp -o StrictHostKeyChecking=no -P $PORT compose.yml $USER@$HOST:/home/$USER/healworld/compose.yml
+          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/home/$USER/myas/docker-compose.yml
 
       - name: Deploy to EC2
         run: |
@@ -78,8 +78,5 @@ jobs:
             docker pull public.ecr.aws/z4n6o0v4/myas/client:latest
             docker pull public.ecr.aws/z4n6o0v4/myas/server:latest
 
-            export AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
-            export AWS_REGION=${{ secrets.AWS_REGION }}
-
-            docker-compose -f /home/$USER/healworld/compose.yml up -d
+            docker-compose -f /home/$USER/myas/docker-compose.yml up -d
           EOF
