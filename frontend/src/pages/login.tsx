@@ -34,7 +34,6 @@ function LoginPage() {
     const form = e.currentTarget;
     const username = form.username.value;
     const password = form.password.value;
-    console.log(username, password, checked);
 
     setLoading(true);
     if (checked) {

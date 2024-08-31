@@ -40,8 +40,11 @@ func (c *AuthController) Login(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "localhost", false, true)
+	domain := ctx.Request.Header.Get("Host")
+	println(domain)
+
+	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "", false, true)
+	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "", false, true)
 }
 
 func (c *AuthController) RefreshToken(ctx *gin.Context) {
@@ -51,8 +54,8 @@ func (c *AuthController) RefreshToken(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "localhost", false, true)
+	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "", false, true)
+	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "", false, true)
 }
 
 func (c *AuthController) Logout(ctx *gin.Context) {
@@ -62,6 +65,6 @@ func (c *AuthController) Logout(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", "", 0, "/", "localhost", false, true)
-	ctx.SetCookie("refresh_token", "", 0, "/", "localhost", false, true)
+	ctx.SetCookie("access_token", "", 0, "/", "", false, true)
+	ctx.SetCookie("refresh_token", "", 0, "/", "", false, true)
 }
