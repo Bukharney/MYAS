@@ -3,8 +3,16 @@ name: Build and Deploy to EC2
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'backend/**'
+      - 'frontend/**'
+      - 'docker-compose.yml'
 
   workflow_dispatch:
 
