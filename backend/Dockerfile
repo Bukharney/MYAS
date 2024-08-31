@@ -19,7 +19,7 @@ RUN GOOS=linux GOARCH=amd64 go build -o /bin/myapp
 FROM ubuntu:jammy
 COPY --from=builder /go/bin/playwright /bin/myapp /
 RUN apt-get update && apt-get install -y ca-certificates tzdata \
-    # Install dependencies and all browsers (or specify one)
-    && /playwright install --with-deps \
+    # Install dependencies and cromium for playwright
+    && /playwright install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/*
 CMD ["/myapp"]
