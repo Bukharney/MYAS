@@ -89,5 +89,5 @@ jobs:
             docker pull public.ecr.aws/z4n6o0v4/myas/client:latest
             docker pull public.ecr.aws/z4n6o0v4/myas/server:latest
 
-            docker-compose -f /home/$USER/myas/docker-compose.yml up -d
+            sudo docker compose -f /home/$USER/myas/docker-compose.yml up -d
           EOF
