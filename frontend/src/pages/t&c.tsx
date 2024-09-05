@@ -38,14 +38,9 @@ function TermsAndConditions() {
                     to continue accessing their account.
                   </li>
                   <li className="text-sm">
-                    We do not collect or store any user passwords. All password
-                    management is handled securely through third-party
-                    authentication providers.
-                  </li>
-                  <li className="text-sm">
-                    We are committed to protecting the privacy and security of
-                    our users' data. For more information on how we handle user
-                    data, please refer to our Privacy Policy.
+                    We do not collect or store any user passwords. We only store
+                    cookies from LEB2 that are necessary for the website to
+                    function properly.
                   </li>
                 </ol>
               </div>

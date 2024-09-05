@@ -1,3 +1,10 @@
+#    ___  __  ____ ____ _____   ___  _  ________  __
+#   / _ )/ / / / //_/ // / _ | / _ \/ |/ / __/\ \/ /
+#  / _  / /_/ / ,< / _  / __ |/ , _/    / _/   \  /
+# /____/\____/_/|_/_//_/_/ |_/_/|_/_/|_/___/   /_/
+#
+# Developed by: @Bukharney
+
 services:
   myas_client:
     image: public.ecr.aws/z4n6o0v4/myas/client:latest

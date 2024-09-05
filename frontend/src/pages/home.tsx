@@ -64,6 +64,9 @@ function HomePage() {
       try {
         setLoading(true);
         const ass = await GetAssignments();
+        if (!ass) {
+          nevigate("login");
+        }
         setAssignments(ass);
       } catch (error) {
         console.error(error);
@@ -73,7 +76,7 @@ function HomePage() {
     };
 
     GetAss();
-  }, [assignments.length, setAssignments]);
+  }, [assignments.length, nevigate, setAssignments]);
 
   useEffect(() => {
     const filteredData = FilterData(assignments, filter);

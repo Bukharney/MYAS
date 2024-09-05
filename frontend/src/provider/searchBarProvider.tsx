@@ -38,7 +38,7 @@ const SearchBarProvider = ({ children }: { children: ReactNode }) => {
   const { assignments } = context;
 
   const classList = Array.from(
-    new Set(assignments.map((assignment) => assignment.ClassName))
+    new Set(assignments?.map((assignment) => assignment.ClassName))
   );
   const [sortBy, setSortBy] = useState<string>("Status");
   const [sortOrder, setSortOrder] = useState<string>("Ascending");
@@ -53,7 +53,7 @@ const SearchBarProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const classList = Array.from(
-      new Set(assignments.map((assignment) => assignment.ClassName))
+      new Set(assignments?.map((assignment) => assignment.ClassName))
     );
     setFilter({
       Late: true,
