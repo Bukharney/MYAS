@@ -23,9 +23,8 @@ jobs:
       - name: Echo Event Name
         run: |
           echo ${{ github.event_name }} 
-          echo ${{ github.event.head_commit.added }} 
-          echo ${{ github.event.head_commit.removed }} 
-          echo ${{ github.event.pull_request.changed_files }}
+          if: ${{ github.event_name == 'push' }}
+            echo ${{ github.event.head_commit.added || github.event.head_commit.modified || github.event.head_commit.removed }}
 
   build-backend:
     runs-on: ubuntu-latest
