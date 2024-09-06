@@ -7,31 +7,16 @@ on:
       - "backend/**"
       - "frontend/**"
       - "docker-compose.yml"
-      - ".github/workflows/deploy.yml"
   pull_request:
     branches: ["main"]
     paths:
       - "backend/**"
       - "frontend/**"
       - "docker-compose.yml"
-      - ".github/workflows/deploy.yml"
 
   workflow_dispatch:
 
 jobs:
-  echo:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Echo Event Name
-        run: |
-          echo ${{ github.event_name }}  ||
-          echo ${{ github.event.head_commit.added }} ||
-          echo ${{ github.event.head_commit.modified }} ||
-          echo ${{ github.event.head_commit.removed }} ||
-          echo ${{ github.event.pull_request.changed_files }} ||
-          echo contains((github.event.head_commit.added || github.event.head_commit.modified || github.event.head_commit.removed), 'frontend/') ||
-          echo contains(github.event.pull_request.changed_files, 'frontend/')
-
   build-and-push:
     runs-on: ubuntu-latest
 
@@ -100,8 +85,6 @@ jobs:
           PORT=22
 
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            sudo su
-            aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
             docker pull public.ecr.aws/z4n6o0v4/myas/client:latest
             docker pull public.ecr.aws/z4n6o0v4/myas/server:latest
 
