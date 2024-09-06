@@ -22,12 +22,12 @@ jobs:
     steps:
       - name: Echo Event Name
         run: |
-          echo ${{ github.event_name }} 
-          echo ${{ github.event.head_commit.added }}
-          echo ${{ github.event.head_commit.modified }}
-          echo ${{ github.event.head_commit.removed }}
-          echo ${{ github.event.pull_request.changed_files }}
-          echo contains((github.event.head_commit.added || github.event.head_commit.modified || github.event.head_commit.removed), 'frontend/')
+          echo ${{ github.event_name }}  &&
+          echo ${{ github.event.head_commit.added }} &&
+          echo ${{ github.event.head_commit.modified }} &&
+          echo ${{ github.event.head_commit.removed }} &&
+          echo ${{ github.event.pull_request.changed_files }} &&
+          echo contains((github.event.head_commit.added || github.event.head_commit.modified || github.event.head_commit.removed), 'frontend/') &&
           echo contains(github.event.pull_request.changed_files, 'frontend/')
 
   build-backend:
