@@ -14,4 +14,4 @@ RUN pnpm build
 
 EXPOSE 5173
 
-CMD ["pnpm", "start"]
+CMD ["pnpm", "preview"]
