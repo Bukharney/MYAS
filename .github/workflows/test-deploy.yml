@@ -117,7 +117,6 @@ jobs:
           PORT=22
 
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
             docker pull public.ecr.aws/z4n6o0v4/myas/server:latest
 
             sudo docker compose -f /home/$USER/myas/docker-compose.yml up -d myas_server
@@ -159,7 +158,6 @@ jobs:
           PORT=22
 
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
-            docker login --username AWS --password-stdin public.ecr.aws/z4n6o0v4
             docker pull public.ecr.aws/z4n6o0v4/myas/client:latest
 
             sudo docker compose -f /home/$USER/myas/docker-compose.yml up -d myas_client
