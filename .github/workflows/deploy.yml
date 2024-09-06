@@ -7,16 +7,24 @@ on:
       - "backend/**"
       - "frontend/**"
       - "docker-compose.yml"
+      - ".github/workflows/deploy.yml"
   pull_request:
     branches: ["main"]
     paths:
       - "backend/**"
       - "frontend/**"
       - "docker-compose.yml"
+      - ".github/workflows/deploy.yml"
 
   workflow_dispatch:
 
 jobs:
+  echo:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo Event Name
+        run: echo ${{ github.event_name }}
+
   build-and-push:
     runs-on: ubuntu-latest
 
