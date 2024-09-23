@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"net/http"
+
 	"github.com/Bukharney/go-scrapper/configs"
 	"github.com/Bukharney/go-scrapper/middlewares"
 	"github.com/Bukharney/go-scrapper/modules/entities"
@@ -43,8 +45,9 @@ func (c *AuthController) Login(ctx *gin.Context) {
 	domain := ctx.Request.Header.Get("Host")
 	println(domain)
 
-	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "", false, true)
-	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "", false, true)
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "", true, true)
+	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "", true, true)
 }
 
 func (c *AuthController) RefreshToken(ctx *gin.Context) {
@@ -54,8 +57,9 @@ func (c *AuthController) RefreshToken(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "", false, true)
-	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "", false, true)
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie("access_token", token.AccessToken, c.Cfg.Auth.AccessTokenExpiresIn, "/", "", true, true)
+	ctx.SetCookie("refresh_token", token.RefreshToken, c.Cfg.Auth.RefreshTokenExpiresIn, "/", "", true, true)
 }
 
 func (c *AuthController) Logout(ctx *gin.Context) {
@@ -65,6 +69,7 @@ func (c *AuthController) Logout(ctx *gin.Context) {
 		return
 	}
 
-	ctx.SetCookie("access_token", "", 0, "/", "", false, true)
-	ctx.SetCookie("refresh_token", "", 0, "/", "", false, true)
+	ctx.SetSameSite(http.SameSiteNoneMode)
+	ctx.SetCookie("access_token", "", 0, "/", "", true, true)
+	ctx.SetCookie("refresh_token", "", 0, "/", "", true, true)
 }

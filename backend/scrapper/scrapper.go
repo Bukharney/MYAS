@@ -1,6 +1,7 @@
 package scrapper
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -9,6 +10,57 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"github.com/playwright-community/playwright-go"
 )
+
+type Playwright struct {
+	Pw      *playwright.Playwright
+	Browser playwright.Browser
+}
+
+func NewPlaywright() *Playwright {
+	pw, err := playwright.Run()
+	if err != nil {
+		log.Fatalf("could not start playwright: %v", err)
+	}
+
+	browser, err := pw.Chromium.Launch(
+		playwright.BrowserTypeLaunchOptions{
+			Args: []string{
+				"--no-sandbox",
+				"--disable-setuid-sandbox",
+				"--disable-gl-drawing-for-tests",
+			},
+		},
+	)
+	if err != nil {
+		log.Fatalf("could not start browser: %v", err)
+	}
+
+	return &Playwright{
+		Pw:      pw,
+		Browser: browser,
+	}
+}
+
+func NewPage(pw *Playwright) (playwright.Page, error) {
+	page, err := pw.Browser.NewPage(
+		playwright.BrowserNewPageOptions{
+			Viewport: &playwright.Size{
+				Width:  1280,
+				Height: 720,
+			},
+		},
+	)
+	if err != nil {
+		return nil, fmt.Errorf("could not create page: %v", err)
+	}
+
+	return page, nil
+}
+
+func ClosePlaywright(pw *Playwright) {
+	pw.Browser.Close()
+	pw.Pw.Stop()
+}
 
 type Assignment struct {
 	Name       string
@@ -161,35 +213,6 @@ func LEB2Login(page playwright.Page, username string, password string) ([]playwr
 	return cookie, nil
 }
 
-func InitPlaywright() (playwright.Page, error) {
-	pw, err := playwright.Run()
-	if err != nil {
-		return nil, fmt.Errorf("could not start Playwright: %v", err)
-	}
-
-	browser, err := pw.Chromium.Launch(
-		playwright.BrowserTypeLaunchOptions{
-			Args: []string{
-				"--no-sandbox",
-				"--disable-setuid-sandbox",
-				"--disable-gl-drawing-for-tests",
-			},
-		},
-	)
-	if err != nil {
-		return nil, fmt.Errorf("could not launch browser: %v", err)
-	}
-
-	page, err := browser.NewPage()
-	if err != nil {
-		return nil, fmt.Errorf("could not create page: %v", err)
-	}
-
-	page.SetViewportSize(1920, 1080)
-
-	return page, err
-}
-
 func GetClassList(page playwright.Page) ([]string, error) {
 	_, err := page.Goto("https://app.leb2.org/class")
 	if err != nil {
@@ -217,27 +240,29 @@ func GetClassList(page playwright.Page) ([]string, error) {
 	return classList, nil
 }
 
-func GetAssignmentsSequence(page playwright.Page, classList []string) ([]ClassAssignments, error) {
-	defer page.Close()
+func GetAssignmentsSequenceWithContext(ctx context.Context, page playwright.Page, classList []string) ([]ClassAssignments, error) {
 	var a []ClassAssignments
-	for _, classID := range classList {
-		ass, err := getAssignments(page, classID)
-		if err != nil {
-			log.Printf("could not get assignments for class %s: %v", classID, err)
-		}
 
-		a = append(a, ass)
+	for _, classID := range classList {
+		select {
+		case <-ctx.Done():
+			// If the context is cancelled, stop the process
+			log.Println("scraping cancelled")
+			return a, ctx.Err()
+		default:
+			// Proceed with scraping the next class
+			ass, err := getAssignments(page, classID)
+			if err != nil {
+				log.Printf("could not get assignments for class %s: %v", classID, err)
+			}
+			a = append(a, ass)
+		}
 	}
 
 	return a, nil
 }
 
-func ScrapeAssignmentsByCookies(cookies []playwright.Cookie) ([]ClassAssignments, error) {
-	page, err := InitPlaywright()
-	if err != nil {
-		return nil, fmt.Errorf("could not start Playwright: %v", err)
-	}
-
+func ScrapeAssignmentsByCookiesWithContext(ctx context.Context, page playwright.Page, cookies []playwright.Cookie) ([]ClassAssignments, error) {
 	page.Context().AddCookies(
 		CookiesOptions(cookies),
 	)
@@ -247,23 +272,17 @@ func ScrapeAssignmentsByCookies(cookies []playwright.Cookie) ([]ClassAssignments
 		return nil, fmt.Errorf("could not get class list: %v", err)
 	}
 
-	a, err := GetAssignmentsSequence(page, classList)
+	// Process assignments with context cancellation support
+	a, err := GetAssignmentsSequenceWithContext(ctx, page, classList)
 	if err != nil {
 		return nil, fmt.Errorf("could not get assignments: %v", err)
 	}
 
-	page.Close()
-
 	return a, nil
 }
 
-func ScrapeAssignmentsByPassword(username, password string) ([]ClassAssignments, error) {
-	page, err := InitPlaywright()
-	if err != nil {
-		return nil, fmt.Errorf("could not start Playwright: %v", err)
-	}
-
-	_, err = LEB2Login(page, username, password)
+func ScrapeAssignmentsByPassword(ctx context.Context, page playwright.Page, username, password string) ([]ClassAssignments, error) {
+	_, err := LEB2Login(page, username, password)
 	if err != nil {
 		return nil, fmt.Errorf("could not login: %v", err)
 	}
@@ -273,7 +292,7 @@ func ScrapeAssignmentsByPassword(username, password string) ([]ClassAssignments,
 		return nil, fmt.Errorf("could not get class list: %v", err)
 	}
 
-	a, err := GetAssignmentsSequence(page, classList)
+	a, err := GetAssignmentsSequenceWithContext(ctx, page, classList)
 	if err != nil {
 		return nil, fmt.Errorf("could not get assignments: %v", err)
 	}

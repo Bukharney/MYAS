@@ -17,8 +17,8 @@ func (s *Server) MapHandlers() error {
 
 	authRepo := repositories.NewAuthRepo(s.Cfg, s.Redis)
 
-	authUsecase := usecases.NewAuthUsecase(s.Cfg, authRepo)
-	assignmentUsecase := usecases.NewAssignmentsUsecase(s.Cfg, authRepo)
+	authUsecase := usecases.NewAuthUsecase(s.Cfg, authRepo, s.Playwright)
+	assignmentUsecase := usecases.NewAssignmentsUsecase(s.Cfg, authRepo, s.Playwright)
 
 	controllers.NewAuthController(authGroup, s.Cfg, authUsecase)
 	controllers.NewAssignmentsController(assignment, s.Cfg, assignmentUsecase)

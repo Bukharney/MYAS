@@ -12,11 +12,12 @@ export default defineConfig({
 
   server: {
     host: true,
-    port: 5173,
+    port: 4173,
     proxy: {
       "/api": {
         target: "http://myas_server:8080",
         changeOrigin: true,
+        // rewrite: (path) => path.replace(/^\/api/, ""),
       },
     },
   },

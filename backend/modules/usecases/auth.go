@@ -12,14 +12,16 @@ import (
 )
 
 type AuthUsecases struct {
-	Cfg      *configs.Configs
-	AuthRepo entities.AuthRepository
+	Cfg        *configs.Configs
+	AuthRepo   entities.AuthRepository
+	Playwright *scrapper.Playwright
 }
 
-func NewAuthUsecase(cfg *configs.Configs, authRepo entities.AuthRepository) entities.AuthUsecase {
+func NewAuthUsecase(cfg *configs.Configs, authRepo entities.AuthRepository, playwright *scrapper.Playwright) entities.AuthUsecase {
 	return &AuthUsecases{
-		Cfg:      cfg,
-		AuthRepo: authRepo,
+		Cfg:        cfg,
+		AuthRepo:   authRepo,
+		Playwright: playwright,
 	}
 }
 
@@ -30,7 +32,7 @@ func (a *AuthUsecases) Login(user entities.Leb2Credentials) (entities.ResToken, 
 		return token, http.StatusInternalServerError, err
 	}
 
-	page, err := scrapper.InitPlaywright()
+	page, err := scrapper.NewPage(a.Playwright)
 	if err != nil {
 		return token, http.StatusInternalServerError, err
 	}

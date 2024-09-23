@@ -8,7 +8,7 @@ require (
 	github.com/gin-gonic/gin v1.10.0
 	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/joho/godotenv v1.5.1
-	github.com/playwright-community/playwright-go v0.4401.1
+	github.com/playwright-community/playwright-go v0.4701.0
 	github.com/redis/go-redis/v9 v9.5.3
 )
 

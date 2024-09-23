@@ -17,8 +17,8 @@ services:
   myas_server:
     image: public.ecr.aws/z4n6o0v4/myas/server:latest
     container_name: myas_server
-    ports:
-      - "8088:8080"
+    expose:
+      - 8080
     environment:
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}

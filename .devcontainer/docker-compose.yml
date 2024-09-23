@@ -1,0 +1,47 @@
+#For development only
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ../:/workspace
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          cpus: "2" # Limit to 0.5 CPU
+          memory: "2048M" # Limit to 512 MB of RAM
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./data:/data
+    environment:
+      - REDIS_REQUIREPASS=28f50c1cb071224f6537b562d4200a80194c6474768791330658096fc95dc1e4
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "redis-cli",
+          "-h",
+          "localhost",
+          "-p",
+          "6379",
+          "-a",
+          "28f50c1cb071224f6537b562d4200a80194c6474768791330658096fc95dc1e4",
+          "ping",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+    command:
+      [
+        "redis-server",
+        "--requirepass",
+        "28f50c1cb071224f6537b562d4200a80194c6474768791330658096fc95dc1e4",
+      ]

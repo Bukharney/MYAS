@@ -4,28 +4,30 @@ import (
 	"errors"
 
 	"github.com/Bukharney/go-scrapper/configs"
+	"github.com/Bukharney/go-scrapper/scrapper"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/redis/go-redis/v9"
 )
 
 type Server struct {
-	App   *gin.Engine
-	Cfg   *configs.Configs
-	Redis *redis.Client
+	App        *gin.Engine
+	Cfg        *configs.Configs
+	Redis      *redis.Client
+	Playwright *scrapper.Playwright
 }
 
 func NewServer(cfg *configs.Configs, redis *redis.Client) *Server {
 	return &Server{
-		App:   gin.Default(),
-		Cfg:   cfg,
-		Redis: redis,
+		App:        gin.Default(),
+		Cfg:        cfg,
+		Redis:      redis,
+		Playwright: scrapper.NewPlaywright(),
 	}
 }
 
 func (s *Server) Run() error {
 	//gin.SetMode(gin.ReleaseMode)
-
 	s.App.Use(cors.New(
 		cors.Config{
 			AllowOrigins:     []string{"*"},

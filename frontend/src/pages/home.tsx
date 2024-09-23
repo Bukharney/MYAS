@@ -57,26 +57,26 @@ function HomePage() {
     useState<ClassData[]>(assignments);
 
   useEffect(() => {
-    if (assignments.length !== 0) {
-      return;
-    }
-    const GetAss = async () => {
-      try {
-        setLoading(true);
-        const ass = await GetAssignments();
-        if (!ass) {
-          nevigate("login");
+    if (assignments.length === 0 && !loading) {
+      const GetAss = async () => {
+        try {
+          setLoading(true);
+          const ass = await GetAssignments();
+          if (!ass) {
+            nevigate("/login");
+          } else {
+            setAssignments(ass);
+          }
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setLoading(false);
         }
-        setAssignments(ass);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      };
 
-    GetAss();
-  }, [assignments.length, nevigate, setAssignments]);
+      GetAss();
+    }
+  }, [assignments.length, nevigate, setAssignments, loading]);
 
   useEffect(() => {
     const filteredData = FilterData(assignments, filter);
