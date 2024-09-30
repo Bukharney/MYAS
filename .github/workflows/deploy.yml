@@ -78,13 +78,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
@@ -95,8 +88,9 @@ jobs:
           HOST=${{ secrets.EC2_HOST }}
           USER=${{ secrets.EC2_USER }}
           PORT=22
-
-          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/home/$USER/myas/docker-compose.yml
+          
+          ssh -o StrictHostKeyChecking=no $USER@$HOST mkdir -p /$USER/myas
+          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/$USER/myas/docker-compose.yml
 
       - name: Deploy Backend to EC2
         run: |
@@ -106,8 +100,7 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
             docker pull public.ecr.aws/z4n6o0v4/myas/server:latest
-
-            sudo docker compose -f /home/$USER/myas/docker-compose.yml up -d myas_server
+            sudo docker compose -f /$USER/myas/docker-compose.yml up -d myas_server
           EOF
 
   deploy-frontend:
@@ -119,13 +112,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v2
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: ${{ secrets.AWS_REGION }}
-
       - name: Set up SSH
         uses: webfactory/ssh-agent@v0.5.3
         with:
@@ -137,7 +123,8 @@ jobs:
           USER=${{ secrets.EC2_USER }}
           PORT=22
 
-          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/home/$USER/myas/docker-compose.yml
+          ssh -o StrictHostKeyChecking=no $USER@$HOST mkdir -p /$USER/myas
+          scp -o StrictHostKeyChecking=no -P $PORT docker-compose.yml $USER@$HOST:/$USER/myas/docker-compose.yml
 
       - name: Deploy Frontend to EC2
         run: |
@@ -148,5 +135,5 @@ jobs:
           ssh -o StrictHostKeyChecking=no $USER@$HOST << 'EOF'
             docker pull public.ecr.aws/z4n6o0v4/myas/client:latest
 
-            sudo docker compose -f /home/$USER/myas/docker-compose.yml up -d myas_client
+            sudo docker compose -f /$USER/myas/docker-compose.yml up -d myas_client
           EOF
