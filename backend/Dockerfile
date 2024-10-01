@@ -22,4 +22,10 @@ RUN apt-get update && apt-get install -y ca-certificates tzdata \
     # Install dependencies and cromium for playwright
     && /playwright install --with-deps chromium \
     && rm -rf /var/lib/apt/lists/*
-CMD ["/myapp"]
+
+RUN apt-get update && apt-get install -y bash curl && curl -1sLf \
+    'https://dl.cloudsmith.io/public/infisical/infisical-cli/setup.deb.sh' | bash \
+    && apt-get update && apt-get install -y infisical
+    
+
+CMD ["infisical", "run", "--", "/myapp"]

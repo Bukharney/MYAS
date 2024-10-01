@@ -3,7 +3,6 @@ package configs
 import (
 	"log"
 	"os"
-	"strconv"
 )
 
 type Configs struct {
@@ -49,9 +48,9 @@ func NewConfigs() *Configs {
 		Auth: Auth{
 			JwtAccessSecret:       MustGetenv("JWT_ACCESS_SECRET"),
 			JwtRefreshSecret:      MustGetenv("JWT_REFRESH_SECRET"),
-			AccessTokenExpiresIn:  atoi("ACCESS_TOKEN_EXPIRES_IN"),
-			RefreshTokenExpiresIn: atoi("REFRESH_TOKEN_EXPIRES_IN"),
-			VerificationExpiresIn: atoi("VERIFICATION_EXPIRES_IN"),
+			AccessTokenExpiresIn:  300,
+			RefreshTokenExpiresIn: 604800,
+			VerificationExpiresIn: 54000,
 			AesKey:                MustGetenv("AES_KEY"),
 		},
 		Redis: Redis{
@@ -60,14 +59,6 @@ func NewConfigs() *Configs {
 			Password: MustGetenv("REDIS_PASSWORD"),
 		},
 	}
-}
-
-func atoi(str string) int {
-	i, err := strconv.Atoi(MustGetenv(str))
-	if err != nil {
-		log.Fatalf("invalid env var %s", str)
-	}
-	return i
 }
 
 func MustGetenv(key string) string {

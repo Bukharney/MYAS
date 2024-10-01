@@ -20,16 +20,7 @@ services:
     expose:
       - 8080
     environment:
-      - REDIS_HOST=${REDIS_HOST}
-      - REDIS_PORT=${REDIS_PORT}
-      - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_DB=${REDIS_DB}
-      - AES_KEY=${AES_KEY}
-      - JWT_ACCESS_SECRET=${JWT_ACCESS_SECRET}
-      - JWT_REFRESH_SECRET=${JWT_REFRESH_SECRET}
-      - ACCESS_TOKEN_EXPIRES_IN=${ACCESS_TOKEN_EXPIRES_IN}
-      - REFRESH_TOKEN_EXPIRES_IN=${REFRESH_TOKEN_EXPIRES_IN}
-      - VERIFICATION_EXPIRES_IN=${VERIFICATION_EXPIRES_IN}
+      - INFISICAL_TOKEN=${INFISICAL_TOKEN_FOR_API}
     depends_on:
       myas_redis:
         condition: service_healthy
